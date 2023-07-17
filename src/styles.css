@@ -1,36 +1,71 @@
 body {
-    background-color: lightblue;
+  background-color: lightblue;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  height: 100vh;
+}
+
+.left {
+  flex: 1;
+  overflow: auto;
+}
+
+.middle {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;  /* Prevent the middle from shrinking */
+}
+
+.right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;  /* Prevent the right from shrinking */
+}
+
+.chat-log {
+  flex: 1;
+  overflow: auto;
+}
+
+.chat-box {
+  flex: none;
 }
 
 .drawing-board {
-    border: 5px solid black;
-    background-color: white;
-
+  border: 5px solid black;
+  background-color: white;
 }
 
 /* makes the list of guesses appear not in bullet point */
 ul {
-    list-style-type: none;
-    padding: 0;
+  list-style-type: none;
+  padding: 0;
 }
 
 .guess {
-    border: 1px solid black;
-    padding: 5px;
-    background-color: lightgray;
-    width: 400px;
+  border: 1px solid black;
+  padding: 5px;
+  background-color: lightgray;
+  width: 100%;  /* Make the guess take up the full width of its container */
+  word-break: break-word;
 }
 
-
 .title {
-    text-align: center;
-    font-size: 22px;
+  text-align: center;
+  font-size: 22px;
 }
 
 .drawing-board-container {
-    text-align: center;
+  text-align: center;
 }
 
 .guesses-container {
-    /* text-align: center; */
+  /* text-align: center; */
 }
