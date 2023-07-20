@@ -23,14 +23,12 @@ const App = () => {
   };
 
   const addGuess = (event) => {
-    event.preventDefault();
-    if (newGuess.trim() !== '') { // Check if the input is not empty and removes any leading or trailing whitespace from the input
-      setGuesses(guesses.concat({player:player.name,guess:newGuess}));
-      setNewGuess('');
-      setTotalGuesses(totalGuesses + 1);
-    }
-  };
-  
+    event.preventDefault() // Prevent form from refreshing the page on submit
+    setGuesses(guesses.concat(newGuess))
+    setNewGuess('') // Clear the input box
+    setTotalGuesses(totalGuesses + 1)
+  }
+
   return (
     <div className="container">
       {/* Show the join game form if the player hasn't joined yet */}
