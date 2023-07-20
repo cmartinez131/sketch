@@ -1,7 +1,7 @@
-const Guess = ({ guess }) => {
+const Guess = ({ player,guess }) => {
     return (
         <li className="guess">
-            {guess}
+            {player}: {guess}
         </li>
     )
 }
