@@ -15,9 +15,11 @@ const App = () => {
 
   const addGuess = (event) => {
     event.preventDefault() // Prevent form from refreshing the page on submit
-    setGuesses(guesses.concat(newGuess))
+    if (newGuess.match(/^ *$/) === null){
+      setGuesses(guesses.concat(newGuess))
+      setTotalGuesses(totalGuesses + 1)
+    }
     setNewGuess('') // Clear the input box
-    setTotalGuesses(totalGuesses + 1)
   }
 
   return (
