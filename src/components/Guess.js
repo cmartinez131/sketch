@@ -1,4 +1,4 @@
-const Guess = ({ player,guess }) => {
+const Guess = ({ player, guess }) => {
     return (
         <li className="guess">
             {player}: {guess}
@@ -7,3 +7,5 @@ const Guess = ({ player,guess }) => {
 }
 
 export default Guess;
+
+

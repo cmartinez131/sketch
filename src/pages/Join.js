@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import JoinGameForm from '../components/JoinGameForm';
 
-const Join = () => {
+const Join = ({ onJoin }) => {
   const [username, setUsername] = useState('');
   const navigate = useNavigate(); // for navigation
 
@@ -11,7 +11,8 @@ const Join = () => {
   //go to /game page
   const handleJoin = (event) => {
     event.preventDefault(); // Prevent form from refreshing the page on submit
-    //right now it just brings you to the game page
+    //send the username to the game page
+    onJoin({ name: username, avatar: '' });
     navigate('/game');
   };
 
@@ -20,9 +21,6 @@ const Join = () => {
   const handleChange = (event) => {
     setUsername(event.target.value);
   };
-
-
-
 
   return (
     <div>
