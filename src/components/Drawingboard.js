@@ -61,7 +61,7 @@ const DrawingBoard = () => {
 
     return (
         <div>
-            <canvas ref={canvasRef} className="drawing-board" width={800} height={400} />
+            <canvas ref={canvasRef} className="drawing-board" width={600} height={600} />
             <br />
             <label>
                 Color:
@@ -74,8 +74,6 @@ const DrawingBoard = () => {
             <button onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}
             </button>
-
-
         </div>
     )
 }

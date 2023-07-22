@@ -2,6 +2,7 @@ import DrawingBoard from '../components/Drawingboard'
 import { useState } from 'react'
 import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
+import '../styles.css'
 
 const Game = ({ player, players }) => {
 
@@ -24,32 +25,37 @@ const Game = ({ player, players }) => {
 
     // need to create a guess form ***
     return (
-        <div>
-            <h1>Game Page</h1>
-            <PlayerList players={players} />
-            <div className='drawing-board-container'>
+        <div className='container'>
+            <div className='left'>
+                <div className='players-list'>
+                    <PlayerList players={players} />
+                </div>
+            </div>
+
+            <div className='middle'>
                 <DrawingBoard />
             </div>
-            <div className='guesses-container'>
-                <form onSubmit={addGuess}>
-                    <input
-                        type="text"
-                        value={newGuess}
-                        onChange={handleGuessChange}
-                    />
-                    <button type="submit">Guess</button>
-                </form>
+            <div className='right'>
+                <h2>Guesses:</h2>
                 <div className="chat-log">
-                    <h2>Guesses:</h2>
                     <ul>
                         {guesses.map((guess, index) =>
                             <Guess key={index} player={player.name} guess={guess} />
                         )}
                     </ul>
+                    
                 </div>
-                <p1>total guesses: {totalGuesses}</p1>
+                <div className='chat-box'>
+                    <form onSubmit={addGuess}>
+                        <input
+                            type="text"
+                            value={newGuess}
+                            onChange={handleGuessChange}
+                        />
+                        <button type="submit">Guess</button>
+                    </form>
+                </div>
             </div>
-
         </div>
     );
 };

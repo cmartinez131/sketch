@@ -1,21 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import JoinGameForm from '../components/JoinGameForm';
+import '../styles.css'
 
 const Join = ({ onJoin }) => {
   const [username, setUsername] = useState('');
   const navigate = useNavigate(); // for navigation
 
-
   //when a player joins
   //go to /game page
   const handleJoin = (event) => {
-    event.preventDefault(); // Prevent form from refreshing the page on submit
-    //send the username to the game page
-    onJoin({ name: username, avatar: '' });
-    navigate('/game');
+    event.preventDefault(); 
+    onJoin({ name: username, avatar: '' }); //save username to the app
+    navigate('/game');  //go to game screen
   };
-
 
   // update the username textfield as user is typing
   const handleChange = (event) => {
@@ -24,10 +22,6 @@ const Join = ({ onJoin }) => {
 
   return (
     <div>
-      <h1>Join Game Page</h1>
-      <p>this is where the user picks their name, avatar, and join game button</p>
-      <p>the join form should go here</p>
-
       {/* todo: put this in JoinGameForm component */}
       <form onSubmit={handleJoin}>
         <input
@@ -38,7 +32,6 @@ const Join = ({ onJoin }) => {
         />
         <button type="submit">Join Game</button>
       </form>
-
     </div>
   );
 };

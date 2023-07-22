@@ -5,9 +5,9 @@ body {
 .container {
     display: flex;
     justify-content: space-between;
-    height: 100vh;
 }
 
+/* using css flex container for left, middle, and right */
 .left {
     flex: 1;
     overflow: auto;
@@ -27,7 +27,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    flex-shrink: 0;
+    overflow: auto;
+    height: 90vh;
     /* Prevent the right from shrinking */
 }
 
@@ -36,52 +37,38 @@ body {
     overflow: auto;
 }
 
-.chat-box {
-    flex: none;
-}
-
 .drawing-board {
     border: 5px solid black;
     background-color: white;
-}
-
-/* makes the list of guesses appear not in bullet point */
-ul {
-    list-style-type: none;
-    padding: 0;
 }
 
 .guess {
     border: 1px solid black;
     padding: 5px;
     background-color: lightgray;
-    width: 100%;
-    /* Make the guess take up the full width of its container */
+    width: 250px;
     word-break: break-word;
 }
-
-.title {
-    text-align: center;
-    font-size: 22px;
+.players-list {
+    font-size: 24px;
 }
 
 .drawing-board-container {
     text-align: center;
 }
 
-
-
 .link {
     padding: 5px;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 24px;
     color: inherit;
-}
-
-.guesses-container {
-    /* text-align: center; */
 }
 
 .link:hover {
     background-color: #75C2F6;
+}
+
+
+ul {
+    padding: 0;
 }

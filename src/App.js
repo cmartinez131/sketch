@@ -5,8 +5,6 @@ import Navbar from './components/Navbar';
 import Game from './pages/Game';
 import Join from './pages/Join';
 
-
-
 const App = () => {
   const [player, setPlayer] = useState(null);
   const [players, setPlayers] = useState([
@@ -19,17 +17,14 @@ const App = () => {
     setPlayers(players => [...players, { username: player.name, score: 0 }])
   }
 
-
   return (
     <>
       <Router>
         <Navbar />
         {/* first loads the join page and then goes to the game page once joined */}
         <Routes>
-
           <Route path="/" element={<Join onJoin={handleJoin} />} />
           <Route path="/game" element={<Game player={player} players={players} />} />
-
         </Routes>
       </Router>
     </>
