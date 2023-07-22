@@ -65,11 +65,21 @@ const DrawingBoard = () => {
             <br />
             <label>
                 Color:
-                <input type="color" value={color} onChange={penColor => setColor(penColor.target.value)} />
+                <input
+                    type="color"
+                    value={color}
+                    onChange={penColor => setColor(penColor.target.value)}
+                />
             </label>
             <label>
                 Width:
-                <input type="range" min="1" max="20" value={width} onChange={penWidth => setWidth(penWidth.target.value)} />
+                <input
+                    type="range"
+                    min="1"
+                    max="20"
+                    value={width}
+                    onChange={penWidth => setWidth(penWidth.target.value)}
+                />
             </label>
             <button onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}

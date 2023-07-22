@@ -1,14 +1,15 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DrawingBoard from '../components/Drawingboard'
-import { useState } from 'react'
 import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
 import '../styles.css'
 
 const Game = ({ player, players }) => {
-
     const [guesses, setGuesses] = useState([])  // New state for the list of guesses
     const [totalGuesses, setTotalGuesses] = useState(0)
     const [newGuess, setNewGuess] = useState('')
+    const navigate = useNavigate(); //for navigation using react router
 
     const handleGuessChange = (event) => {
         setNewGuess(event.target.value)
@@ -22,8 +23,14 @@ const Game = ({ player, players }) => {
         }
         setNewGuess('') //clear the input box
     }
+   
+    //go to home page if you refresh while drawing. it would crash before
+    useEffect(() => {
+        if (!player) {
+            navigate('/');
+        }
+    }, [player, navigate]);
 
-    // need to create a guess form ***
     return (
         <div className='container'>
             <div className='left'>
@@ -43,7 +50,7 @@ const Game = ({ player, players }) => {
                             <Guess key={index} player={player.name} guess={guess} />
                         )}
                     </ul>
-                    
+                    <p1>total guesses: {totalGuesses}</p1>
                 </div>
                 <div className='chat-box'>
                     <form onSubmit={addGuess}>

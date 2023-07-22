@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React, { useState } from 'react';
 import Navbar from './components/Navbar';
 import Game from './pages/Game';
@@ -21,7 +21,7 @@ const App = () => {
     <>
       <Router>
         <Navbar />
-        {/* first loads the join page and then goes to the game page once joined */}
+        {/* first loads the join page */}
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} />} />
           <Route path="/game" element={<Game player={player} players={players} />} />
