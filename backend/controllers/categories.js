@@ -1,5 +1,6 @@
 const categoryRouter = require('express').Router()
 const Category = require('../models/category')
+const User = require('../models/user')
 
 categoryRouter.get('/', async (request, response) => {
   const categories = await Category.find({})
@@ -19,17 +20,33 @@ categoryRouter.get('/:id', async (request, response) => {
 categoryRouter.post('/', async (request, response) => {
 	const body = request.body
 
+	const user = await User.findById(body.userId)
+
 	const category = new Category({
 		category: body.category,
-    user: body.user,
+    user: user.id,
     words: body.words
 	})  
 
 	const savedCategory = await category.save()
+	user.personalWordLists = user.personalWordLists.concat(savedCategory._id)
+	await user.save()
+
 	response.status(201).json(savedCategory)
 })
 
 categoryRouter.delete('/:id', async (request, response) => {
+	const categoryId = request.params.id
+
+	const category = await Category.findById(categoryId)
+	const userId = category.user
+
+	const user = await User.findById(userId)
+	user.personalWordLists = user.personalWordLists.filter(
+		(category => !category.equals(categoryId))
+	)
+	await user.save()
+
 	await Category.findByIdAndRemove(request.params.id)
 	response.status(204).end()
 })
