@@ -3,12 +3,14 @@ const Category = require('../models/category')
 const User = require('../models/user')
 
 categoryRouter.get('/', async (request, response) => {
-  const categories = await Category.find({})
+  const categories = await Category
+		.find({}).populate('user', { username: 1, name: 1 })
   response.json(categories)
 })
 
 categoryRouter.get('/:id', async (request, response) => {
-  const category = await Category.findById(request.params.id)
+  const category = await Category
+		.findById(request.params.id).populate('user', { username: 1, name: 1 })
 	if (category) {
 		response.json(category)
 	}

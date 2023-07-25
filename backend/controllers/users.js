@@ -4,12 +4,14 @@ const User = require('../models/user')
 const Category = require('../models/category')
 
 userRouter.get('/', async (request, response) => {
-  const users = await User.find({})
+  const users = await User
+		.find({}).populate('personalWordLists', { category: 1, words: 1})
   response.json(users)
 })
 
 userRouter.get('/:id', async (request, response) => {
-  const user = await User.findById(request.params.id)
+  const user = await User
+		.findById(request.params.id).populate('personalWordLists', { category: 1, words: 1})
 	if (user) {
 		response.json(user)
 	}
