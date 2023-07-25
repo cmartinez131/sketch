@@ -1,10 +1,27 @@
 const mongoose = require('mongoose')
 
 const categorySchema = new mongoose.Schema({
-  category: { type: String, required: true },
-  user: String,
-  words: { type: [String], 
-           validate: v => v == null || v.length > 0}
+  category: { 
+		type: String,
+		required: [true, 'Category name required'],
+	},
+  user: { 
+		type: mongoose.Schema.Types.ObjectId, 
+		ref: 'User'
+	},
+  words: { 
+		type: [String],
+		validate: {
+			validator: function(arr) {
+				if (!arr || arr.length === 0){
+					return false
+				}
+
+				return arr.every(word => word.trim().length > 0)
+			},
+			message: 'Must contain at least one word'
+		}
+	}
 })
 
 categorySchema.set('toJSON', {

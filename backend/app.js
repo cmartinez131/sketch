@@ -4,6 +4,7 @@ require('express-async-errors')
 const app = express()
 const cors = require('cors')
 const categoriesRouter = require('./controllers/categories')
+const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 mongoose.set('strictQuery', false)
@@ -23,5 +24,6 @@ app.use(express.static('build'))
 app.use(express.json())
 
 app.use('/api/categories', categoriesRouter)
+app.use('/api/users', usersRouter)
 
 module.exports = app

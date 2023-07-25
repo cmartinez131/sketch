@@ -29,7 +29,7 @@ categoryRouter.post('/', async (request, response) => {
 	response.status(201).json(savedCategory)
 })
 
-categoryRouter.delete('/:id', async (request, response, next) => {
+categoryRouter.delete('/:id', async (request, response) => {
 	await Category.findByIdAndRemove(request.params.id)
 	response.status(204).end()
 })
@@ -37,15 +37,12 @@ categoryRouter.delete('/:id', async (request, response, next) => {
 categoryRouter.put('/:id', async (request, response) => {
 	const body = request.body
 
-  if (!body.words || body.words.length === 0) {
-    return response.status(400).json({ error: 'The "words" array must not be empty.' });
-  }
-
 	const category = {
+		category: body.category,
 		words: body.words
 	}
 
-	const updatedCategory = await Category.findByIdAndUpdate(request.params.id, category, { new: true })
+	const updatedCategory = await Category.findByIdAndUpdate(request.params.id, category, { new: true, runValidators: true })
 	response.json(updatedCategory)
 })
 
