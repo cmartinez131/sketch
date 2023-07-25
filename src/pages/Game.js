@@ -5,66 +5,78 @@ import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
 import '../styles.css'
 
-const Game = ({ player, players }) => {
-    const [guesses, setGuesses] = useState([])  // New state for the list of guesses
-    const [totalGuesses, setTotalGuesses] = useState(0)
-    const [newGuess, setNewGuess] = useState('')
-    const navigate = useNavigate(); //for navigation using react router
+const Game = ({ player, players, socket }) => {
+  const [chat, setChat] = useState([]);
+  const [newGuess, setNewGuess] = useState('');
+  const navigate = useNavigate();
 
-    const handleGuessChange = (event) => {
-        setNewGuess(event.target.value)
+  useEffect(() => {
+    if (!player) {
+      navigate('/');
     }
 
-    const addGuess = (event) => {
-        event.preventDefault() //prevent form from refreshing the page on submit
-        if (newGuess.match(/^ *$/) === null) {
-            setGuesses(guesses.concat(newGuess))
-            setTotalGuesses(totalGuesses + 1)
-        }
-        setNewGuess('') //clear the input box
+    if (socket == null) return;
+
+    // Listen for incoming messages
+    socket.on('chat message', message => {
+      console.log('Received message:', message); // Log the received message
+      setChat(prevChat => [...prevChat, message]); // Add the new message to the chat state
+    });
+
+    return () => {
+      socket.off('chat message');
     }
-   
-    //go to home page if you refresh while drawing. it would crash before
-    useEffect(() => {
-        if (!player) {
-            navigate('/');
-        }
-    }, [player, navigate]);
+  }, [socket, player, navigate]);
 
-    return (
-        <div className='container'>
-            <div className='left'>
-                <div className='players-list'>
-                    <PlayerList players={players} />
-                </div>
-            </div>
+  const handleGuessChange = (event) => {
+    setNewGuess(event.target.value)
+  }
 
-            <div className='middle'>
-                <DrawingBoard />
-            </div>
-            <div className='right'>
-                <h2>Guesses:</h2>
-                <div className="chat-log">
-                    <ul>
-                        {guesses.map((guess, index) =>
-                            <Guess key={index} player={player.name} guess={guess} />
-                        )}
-                    </ul>
-                    <p1>total guesses: {totalGuesses}</p1>
-                </div>
-                <div className='chat-box'>
-                    <form onSubmit={addGuess}>
-                        <input
-                            type="text"
-                            value={newGuess}
-                            onChange={handleGuessChange}
-                        />
-                        <button type="submit">Guess</button>
-                    </form>
-                </div>
-            </div>
+  const addGuess = (event) => {
+    event.preventDefault();
+    if (newGuess.match(/^ *$/) === null) {
+      const message = {user: player.name, text: newGuess};
+      setChat([...chat, message]);
+      if (socket != null) {
+        socket.emit('chat message', message);
+      }
+    }
+    setNewGuess('');
+  }
+
+  return (
+    <div className='container'>
+      <div className='left'>
+        <PlayerList players={players} />
+      </div>
+      <div className='middle'>
+        <DrawingBoard />
+      </div>
+      <div className='right'>
+        <div className="chat-container">
+          <div className="chat-log">
+            <ul>
+              {chat.map((message, i) =>
+                <li key={i} style={{backgroundColor: i % 2 === 0 ? 'white' : 'lightblue'}}>
+                  <b>{message.user}</b>: {message.text}
+                </li>
+              )}
+            </ul>
+          </div>
+          <div className='chat-box'>
+            <form onSubmit={addGuess}>
+              <input
+                type="text"
+                value={newGuess}
+                onChange={handleGuessChange}
+                placeholder="Type your guess here..."
+              />              
+            </form>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Game;
