@@ -35,9 +35,6 @@ body {
 .drawing-board {
     border: 5px solid black;
     background-color: white;
-    border-radius: 5px;
-    height: 550px;  /* Set a fixed height for the drawing board */
-    width: 800px;   /* Set a fixed width for the drawing board */
 }
 
 .chat-container {

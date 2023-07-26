@@ -3,24 +3,31 @@ const socketio = require('socket.io')
 const app = require('./app')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
-
 const server = http.createServer(app)
-const io = socketio(server)
+const { Server } = require('socket.io');
 
-io.on('connection', (socket) => {
-	console.log('a user connected')
+const cors = require('cors')
 
-	socket.on('chat message', (message) => {
-
-		// When we receive a 'chat message' event
-		console.log('message: ' + JSON.stringify(message))
-		
-		// send that message to all connected clients
-		io.emit('chat message', message);
-	});
-
+const PORT = 3001
+server.listen(PORT, () => {
+	logger.info(`Server running on port ${PORT}`)
 })
 
-server.listen(config.PORT, () => {
-	logger.info(`Server running on port ${config.PORT}`)
+const io = require('socket.io')(server, {
+	cors: {
+		origin: '*',
+	}
+})
+
+io.on('connection', socket => {
+	console.log('a user connected')
+
+	socket.on('chat-message', message=>{
+		console.log(message)
+		io.emit('chat-message', message) // send to all clients
+	})
+
+	socket.on('disconnect', () => {
+		console.log('user disconnected')
+	})
 })
