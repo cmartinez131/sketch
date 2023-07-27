@@ -1,16 +1,17 @@
-const http = require('http')
-const socketio = require('socket.io')
 const app = require('./app')
 const config = require('./utils/config')
 const logger = require('./utils/logger')
+
+// Setting up socket
+const http = require('http')
 const server = http.createServer(app)
+const socketio = require('socket.io')
 const { Server } = require('socket.io');
 
 const cors = require('cors')
 
-const PORT = 3001
-server.listen(PORT, () => {
-	logger.info(`Server running on port ${PORT}`)
+server.listen(config.PORT, () => {
+	logger.info(`Server running on port ${config.PORT}`)
 })
 
 const io = require('socket.io')(server, {
@@ -20,14 +21,14 @@ const io = require('socket.io')(server, {
 })
 
 io.on('connection', socket => {
-	console.log('a user connected')
+	logger.info('a user connected')
 
 	socket.on('chat-message', message=>{
-		console.log(message)
+		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
 	})
 
 	socket.on('disconnect', () => {
-		console.log('user disconnected')
+		logger.info('user disconnected')
 	})
 })
