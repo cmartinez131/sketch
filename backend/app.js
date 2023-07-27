@@ -3,6 +3,7 @@ const express = require('express')
 const app = express()
 const cors = require('cors')
 const categoriesRouter = require('./controllers/categories')
+const usersRouter = require('./controllers/users')
 const logger = require('./utils/logger')
 const mongoose = require('mongoose')
 const path = require('path')
@@ -23,8 +24,12 @@ app.use(cors())
 app.use(express.static('build'))
 app.use(express.json())
 app.use('/api/categories', categoriesRouter)
+
 // Serve the static files from the React app
 app.use(express.static(path.join(__dirname, 'build')));
+
+app.use('/api/users', usersRouter)
+
 
 // Handles any requests that don't match the ones above
 app.get('*', (req,res) =>{
