@@ -44,9 +44,6 @@ const App = () => {
   // Pass socket and players to the Game component
   return (
     <>
-      {/* <div className="App">
-      <script defer src="http://localhost:3001/socket.io/socket.io.js"></script>
-      <script defer src="index.js"></script> */}
       <Router>
         <Navbar />
         {/* first loads the join page */}
@@ -55,9 +52,6 @@ const App = () => {
           <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} />} />
         </Routes>
       </Router>
-
-      <h1>IO test</h1>
-      {/* </div> */}
     </>
   )
 }
