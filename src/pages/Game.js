@@ -5,7 +5,7 @@ import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
 import '../styles.css'
 
-const Game = ({ player, players, messages, sendMessage }) => {
+const Game = ({ player, players, messages, sendMessage, socket }) => {
 
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ const Game = ({ player, players, messages, sendMessage }) => {
         <PlayerList players={players} />
       </div>
       <div className='middle'>
-        <DrawingBoard />
+        <DrawingBoard socket={socket}/>
       </div>
       <div className='right'>
         <Guess player={player} messages={messages} sendMessage={sendMessage} />
