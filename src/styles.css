@@ -23,6 +23,7 @@ body {
     align-items: center;
     flex-shrink: 0;
     margin: 0 3px;
+    flex-direction: column
 }
 
 .right {
@@ -93,4 +94,44 @@ body {
 ul {
     padding: 0;
     list-style-type: none;
+}
+
+.homePage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 90vh;
+}
+  
+.homePage h1{
+    font-size: 5rem;
+}
+
+.homePage ul{
+    font-size: 3rem;
+    margin: 40px 0;
+}
+
+.homePage li {
+    margin: 20px 0;
+}
+
+.joinGameForm {
+    font-size: 3rem;
+}
+  
+.joinGameForm input,
+.joinGameForm select,
+.joinGameForm button {
+    font-size: 2rem;
+    margin: 10px;
+}
+
+.playerListItem {
+    font-size: 40px;
+    margin: 20px;
+}
+
+.currentWord {
+    font-size: 40px;
 }

@@ -23,7 +23,7 @@ const io = require('socket.io')(server, {
 io.on('connection', socket => {
 	logger.info('a user connected')
 
-	socket.on('chat-message', message=>{
+	socket.on('chat-message', message => {
 		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
 	})

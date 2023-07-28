@@ -5,8 +5,7 @@ const Navbar = () => {
     return (
         <div>
             <div>
-                <Link className='link' to="/">Join Game</Link>
-                <Link className='link' to="/game">Game</Link>
+                <Link className='link' to="/">SKETCH</Link>
             </div>
 
         </div >

@@ -4,6 +4,8 @@ import { io } from 'socket.io-client';
 import Navbar from './components/Navbar';
 import Game from './pages/Game';
 import Join from './pages/Join';
+import categoryService from './services/categories'
+import userService from './services/users'
 
 const ENDPOINT = 'http://localhost:3001';
 
@@ -15,6 +17,7 @@ const App = () => {
   ]);
   const [socket, setSocket] = useState(null); // State to hold the socket
   const [messages, setMessages] = useState([]); // State to hold sent and received messages
+  const [words, setWords] = useState([]) // State to hold the words
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
@@ -36,6 +39,14 @@ const App = () => {
     }
   }
 
+  useEffect(() => {
+    categoryService
+      .getAll()
+      .then(response => {
+        setWords(response.data)
+      })
+  }, [])
+
   const handleJoin = (player) => {
     setPlayer(player);
     setPlayers(players => [...players, { username: player.name, score: 0 }])
@@ -49,7 +60,7 @@ const App = () => {
         {/* first loads the join page */}
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} />} />
-          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} />} />
+          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} words={words}/>} />
         </Routes>
       </Router>
     </>
