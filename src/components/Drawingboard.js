@@ -1,8 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { io } from 'socket.io-client'
 import '../styles.css'
 
 //define DrawingBoard component
-const DrawingBoard = () => {
+const DrawingBoard = ({ socket }) => {
     //use the react useRef hook to get a reference to the canvas DOM element
     const canvasRef = useRef(null);
 
@@ -12,22 +13,27 @@ const DrawingBoard = () => {
     const [width, setWidth] = useState(5);
     const [mode, setMode] = useState('draw');  // New state variable for the mode
 
-    //define function to handle mousedown event
+    //define function to handle mousedown event: emit 'start-drawing' event to server and all clients
     const handleMouseDown = (event) => {    //event is the object passed into function
         setIsDrawing(true);
         draw(event);
+        socket.emit('start-drawing', { clientX: event.clientX, clientY: event.clientY, color, width })
     }
 
+    //define function to handle mouse-up event: emit 'stop=drawing' event
     const handleMouseUp = () => {
         setIsDrawing(false);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.beginPath();
+        socket.emit('stop-drawing')
     }
 
+    //define function to handle mouse-move event. if isDrawing is true, emit 'drawing' event to socket
     const handleMouseMove = (event) => {
         if (isDrawing) {
             draw(event);
+            socket.emit('drawing', { clientX: event.clientX, clientY: event.clientY, color, width })
         }
     }
 
@@ -50,7 +56,34 @@ const DrawingBoard = () => {
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('mouseup', handleMouseUp);
         canvas.addEventListener('mousemove', handleMouseMove);
+        
+        socket.on('start-drawing', ({ clientX, clientY, color, width }) => {
+            setIsDrawing(true);
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            ctx.lineWidth = width;
+            ctx.strokeStyle = color;
+            ctx.moveTo(clientX - canvas.offsetLeft, clientY - canvas.offsetTop);
+        });
 
+        socket.on('drawing', ({ clientX, clientY, color, width }) => {
+            if (isDrawing) {
+                const canvas = canvasRef.current;
+                const ctx = canvas.getContext('2d');
+                ctx.lineWidth = width;
+                ctx.strokeStyle = color;
+                ctx.lineTo(clientX - canvas.offsetLeft, clientY - canvas.offsetTop);
+                ctx.stroke();
+            }
+        });
+
+        socket.on('stop-drawing', () => {
+            setIsDrawing(false);
+            const canvas = canvasRef.current;
+            const ctx = canvas.getContext('2d');
+            ctx.beginPath();
+        });
+        
         // Cleanup function to remove event listeners
         return () => {
             canvas.removeEventListener('mousedown', handleMouseDown);

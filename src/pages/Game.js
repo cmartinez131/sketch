@@ -5,7 +5,7 @@ import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
 import '../styles.css'
 
-const Game = ({ player, players, messages, sendMessage, words }) => {
+const Game = ({ player, players, messages, sendMessage, words, socket }) => {
 
   const navigate = useNavigate();
   const [currentWord, setCurrentWord] = useState('')
@@ -29,7 +29,7 @@ const Game = ({ player, players, messages, sendMessage, words }) => {
       </div>
       <div className='middle'>
         <h2 className='currentWord'>{currentWord}</h2>
-        <DrawingBoard />
+        <DrawingBoard socket={socket}/>
       </div>
       <div className='right'>
         <Guess player={player} messages={messages} sendMessage={sendMessage} />

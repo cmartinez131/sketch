@@ -23,12 +23,32 @@ const io = require('socket.io')(server, {
 io.on('connection', socket => {
 	logger.info('a user connected')
 
+	//event listener for message
 	socket.on('chat-message', message => {
 		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
 	})
 
-	socket.on('disconnect', () => {
+	//event listener for 'start-drawing'
+	socket.on('start-drawing', ({ clientX, clientY, color, width }) => {
+		socket.broadcast.emit('start-drawing', { clientX, clientY, color, width });
+		logger.info('a user started drawing')
+	});
+
+	//event listener for 'drawing'
+	socket.on('drawing', ({ clientX, clientY, color, width }) => {
+		socket.broadcast.emit('drawing', { clientX, clientY, color, width });
+		//logger.info('a user is drawing')
+	});
+
+	//event listener for 'stop-drawing'
+	socket.on('stop-drawing', () => {
+		socket.broadcast.emit('stop-drawing');
+		logger.info('a user stopped drawing')
+	});
+
+
+	socket.on('disconnect', () => {   //todo: when player disconnects, remove from players list
 		logger.info('user disconnected')
 	})
 })
