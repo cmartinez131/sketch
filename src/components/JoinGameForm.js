@@ -10,7 +10,7 @@ const JoinGameForm = ({ onJoin }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="joinGameForm">
       <label>
         Name:
         <input

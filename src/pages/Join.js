@@ -13,10 +13,16 @@ const Join = ({ onJoin }) => {
   };
 
   return (
-    <div>
+    <div className="homePage">
+      <h1>Sketch</h1>
       <JoinGameForm onJoin={handleJoin} />
-      <h1>Below is where the instructions will go</h1>
-      <p>instructions</p>
+      <ul>
+        <li>When it's your turn, choose a word you want to draw!</li>
+        <li>Try to draw your chosen word! No spelling!</li>
+        <li>Let other players try to guess your drawn word!</li>
+        <li>When it's not your turn, try to guess what other players are drawing!</li>
+        <li>Score the most points and be crowned the winner at the end!</li>
+      </ul>
     </div>
   );
 };

@@ -5,9 +5,10 @@ import Guess from '../components/Guess'
 import PlayerList from '../components/PlayerList';
 import '../styles.css'
 
-const Game = ({ player, players, messages, sendMessage, socket }) => {
+const Game = ({ player, players, messages, sendMessage, words, socket }) => {
 
   const navigate = useNavigate();
+  const [currentWord, setCurrentWord] = useState('')
 
   useEffect(() => {
     if (!player) {
@@ -15,12 +16,19 @@ const Game = ({ player, players, messages, sendMessage, socket }) => {
     }
   }, [player, navigate]);
 
+  useEffect(() => {
+    const length = words[0].words.length
+    const randomIndex = Math.floor(Math.random() * length)
+    setCurrentWord(words[0].words[randomIndex])
+  }, [])
+
   return (
     <div className='container'>
       <div className='left'>
         <PlayerList players={players} />
       </div>
       <div className='middle'>
+        <h2 className='currentWord'>{currentWord}</h2>
         <DrawingBoard socket={socket}/>
       </div>
       <div className='right'>

@@ -29,7 +29,7 @@ io.on('connection', socket => {
 		io.emit('chat-message', message) // send to all clients
 	})
 
-	//event listeners for 'start-drawing'
+	//event listener for 'start-drawing'
 	socket.on('start-drawing', ({ clientX, clientY, color, width }) => {
 		socket.broadcast.emit('start-drawing', { clientX, clientY, color, width });
 		logger.info('a user started drawing')
@@ -48,7 +48,7 @@ io.on('connection', socket => {
 	});
 
 
-	socket.on('disconnect', () => {
+	socket.on('disconnect', () => {   //todo: when player disconnects, remove from players list
 		logger.info('user disconnected')
 	})
 })
