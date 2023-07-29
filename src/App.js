@@ -16,15 +16,22 @@ const App = () => {
   const [socket, setSocket] = useState(null); // State to hold the socket
   const [messages, setMessages] = useState([]); // State to hold sent and received messages
 
+  // set up socket conenction and event listeners when compoenent mounts
   useEffect(() => {
     const newSocket = io(ENDPOINT);
     setSocket(newSocket);
 
+    // listen for the 'chat-message' event from the server. it appends the old message list with new message
     newSocket.on('chat-message', data => {
       setMessages(oldMessages => [...oldMessages, data]);
       console.log(data);
     });
 
+    // listen for the 'update-players' event from the server. it updates the players list
+    newSocket.on('update-players', updatedPlayers => {
+      setPlayers(updatedPlayers);
+    })
+    // cleanup function to disconnect the socket from the server when component unmounts
     return () => {
       newSocket.disconnect();
     };
@@ -38,10 +45,11 @@ const App = () => {
 
   const handleJoin = (player) => {
     setPlayer(player);
-    setPlayers(players => [...players, { username: player.name, score: 0 }])
+    const newPlayer = { username: player.name, score: 0 }
+    setPlayers(players => [...players, newPlayer])  //add newplayer to players array
+    socket.emit('player-joined', newPlayer)  //send 'player-joined' and the new player to the server
   }
 
-  // Pass socket and players to the Game component
   return (
     <>
       <Router>
