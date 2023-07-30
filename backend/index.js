@@ -19,6 +19,11 @@ function getRandomIndex(array) {
   return Math.floor(Math.random() * array.length);
 }
 
+function isDrawer(username) {
+	const player = players.find((p) => p.username === username);
+	return player.drawer
+}
+
 server.listen(config.PORT, () => {
 	logger.info(`Server running on port ${config.PORT}`)
 })
@@ -36,7 +41,7 @@ io.on('connection', socket => {
 	socket.on('chat-message', message => {
 		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
-		if (message.text === word){
+		if (message.text === word && !isDrawer(message.user)){
 			word = words[getRandomIndex(words)]
 			io.emit('update-word', word)
 			logger.info('current word', word)
@@ -63,6 +68,8 @@ io.on('connection', socket => {
 
 	// event listener that adds players to active players and sends updated players list
     socket.on('player-joined', player => {
+				if (players.length === 0)
+					player.drawer = true
         players.push(player);
         // socket.username assigns username to each socket connection to the server
         socket.username = player.username;

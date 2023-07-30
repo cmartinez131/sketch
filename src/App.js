@@ -62,7 +62,7 @@ const App = () => {
 
   const handleJoin = (player) => {
     setPlayer(player);
-    const newPlayer = { username: player.name, score: 0 }
+    const newPlayer = { username: player.name, score: 0, drawer: false }
     setPlayers(players => [...players, newPlayer])  //add newplayer to players array
     socket.emit('player-joined', newPlayer)  //send 'player-joined' and the new player to the server
     socket.emit('words', words)
