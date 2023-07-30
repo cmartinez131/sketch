@@ -10,7 +10,7 @@ const DrawingBoard = ({ socket }) => {
     //use useState hook to create state variables for drawing status, color, stroke width, and drawing/erasing mode
     const [isDrawing, setIsDrawing] = useState(false);
     const [color, setColor] = useState('#000000');
-    const [width, setWidth] = useState(5);
+    const [width, setWidth] = useState(10);
     const [mode, setMode] = useState('draw');  // New state variable for the mode
 
     //define function to handle mousedown event: emit 'start-drawing' event to server and all clients
@@ -50,6 +50,13 @@ const DrawingBoard = ({ socket }) => {
         ctx.stroke();//apply the stroke
     }
 
+    const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        socket.emit('clear-canvas');
+    };
+
     // Use the useEffect hook to add event listeners
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -83,6 +90,9 @@ const DrawingBoard = ({ socket }) => {
             const ctx = canvas.getContext('2d');
             ctx.beginPath();
         });
+
+        // event listener tells socket to clear canvas when it gets 'clear-canvas' events
+        socket.on('clear-canvas', clearCanvas);
         
         // Cleanup function to remove event listeners
         return () => {
@@ -117,6 +127,7 @@ const DrawingBoard = ({ socket }) => {
             <button onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}
             </button>
+            <button onClick={clearCanvas}>Clear</button>
         </div>
     )
 }

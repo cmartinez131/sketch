@@ -29,6 +29,9 @@ const io = require('socket.io')(server, {
 	}
 })
 
+//socket.broadcast.emit method sends a message to all connected clients except for the client that initiated the event
+//io.emit method sends a message to all connected clients, including the client that initiated the event.
+
 io.on('connection', socket => {
 	logger.info('a user connected')
 
@@ -69,6 +72,12 @@ io.on('connection', socket => {
         io.emit('update-players', players);
         logger.info('current players', players)
     })
+
+	//socket listens for 'clear-canvas' event then broadcasts it to clients
+	socket.on('clear-canvas', () => {
+		socket.broadcast.emit('clear-canvas');
+		logger.info('canvas cleared');
+	});
 
 	socket.on('words', initialWords => {
 		words = initialWords;
