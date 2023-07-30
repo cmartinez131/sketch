@@ -17,7 +17,17 @@ const App = () => {
   ]);
   const [socket, setSocket] = useState(null); // State to hold the socket
   const [messages, setMessages] = useState([]); // State to hold sent and received messages
-  const [words, setWords] = useState([]) // State to hold the words
+  const [words, setWords] = useState([]); // State to hold the words
+  const [word, setWord] = useState('');
+
+  useEffect(() => {
+    categoryService
+      .getAll()
+      .then(response => {
+        const newWords = response.data[0].words
+        setWords(newWords);
+      })
+  }, [])
 
   useEffect(() => {
     const newSocket = io(ENDPOINT);
@@ -34,6 +44,10 @@ const App = () => {
       setPlayers(updatedPlayers);
     })
 
+    newSocket.on('update-word', updatedWord => {
+      setWord(updatedWord);
+    })
+
     // cleanup function to disconnect the socket from the server when component unmounts
     return () => {
       newSocket.disconnect();
@@ -46,19 +60,12 @@ const App = () => {
     }
   }
 
-  useEffect(() => {
-    categoryService
-      .getAll()
-      .then(response => {
-        setWords(response.data)
-      })
-  }, [])
-
   const handleJoin = (player) => {
     setPlayer(player);
     const newPlayer = { username: player.name, score: 0 }
     setPlayers(players => [...players, newPlayer])  //add newplayer to players array
     socket.emit('player-joined', newPlayer)  //send 'player-joined' and the new player to the server
+    socket.emit('words', words)
   }
 
   // Pass socket and players to the Game component
@@ -69,7 +76,7 @@ const App = () => {
         {/* first loads the join page */}
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} />} />
-          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} words={words}/>} />
+          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word}/>} />
         </Routes>
       </Router>
     </>

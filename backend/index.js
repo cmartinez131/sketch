@@ -10,6 +10,15 @@ const { Server } = require('socket.io');
 
 const cors = require('cors')
 
+// array to store the active players on server
+let players = [];
+let words = [];
+let word = '';
+
+function getRandomIndex(array) {
+  return Math.floor(Math.random() * array.length);
+}
+
 server.listen(config.PORT, () => {
 	logger.info(`Server running on port ${config.PORT}`)
 })
@@ -20,16 +29,18 @@ const io = require('socket.io')(server, {
 	}
 })
 
-// array to store the active players on server
-let players = [];
-
 io.on('connection', socket => {
 	logger.info('a user connected')
 
-	// event listener 'chat-message' evenets and send them to all clients
+	// event listener 'chat-message' events and send them to all clients
 	socket.on('chat-message', message => {
 		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
+		if (message.text === word){
+			word = words[getRandomIndex(words)]
+			io.emit('update-word', word)
+			logger.info('current word', word)
+		}
 	})
 
 	// event listeners for 'start-drawing' events and sends them to all clients
@@ -59,6 +70,14 @@ io.on('connection', socket => {
         logger.info('current players', players)
     })
 
+	socket.on('words', initialWords => {
+		words = initialWords;
+		if (word === ''){
+			word = words[getRandomIndex(words)]
+		}
+		io.emit('update-word', word)
+		logger.info('current word', word)
+	})
 
 	// event listener to remove player from active players and update list for all players
     socket.on('disconnect', () => {
