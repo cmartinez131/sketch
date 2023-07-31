@@ -16,7 +16,7 @@ let words = [];
 let word = '';
 
 function getRandomIndex(array) {
-  return Math.floor(Math.random() * array.length);
+	return Math.floor(Math.random() * array.length);
 }
 
 function isDrawer(username) {
@@ -44,7 +44,17 @@ io.on('connection', socket => {
 	socket.on('chat-message', message => {
 		logger.info(message)
 		io.emit('chat-message', message) // send to all clients
-		if (message.text === word && !isDrawer(message.user)){
+		if (message.text === word && !isDrawer(message.user)) {
+			//Find the player who guessed correctly
+			const player = players.find((p) => p.username === message.user)
+			if (player) {
+				player.score += 1
+			}
+			//Sort the players by score
+			players.sort((a, b) => b.score - a.score)
+			//Update the players list
+			io.emit('update-players', players)
+
 			word = words[getRandomIndex(words)]
 			io.emit('update-word', word)
 			logger.info('current word', word)
@@ -70,15 +80,15 @@ io.on('connection', socket => {
 	});
 
 	// event listener that adds players to active players and sends updated players list
-    socket.on('player-joined', player => {
-				if (players.length === 0)
-					player.drawer = true
-        players.push(player);
-        // socket.username assigns username to each socket connection to the server
-        socket.username = player.username;
-        io.emit('update-players', players);
-        logger.info('current players', players)
-    })
+	socket.on('player-joined', player => {
+		if (players.length === 0)
+			player.drawer = true
+		players.push(player);
+		// socket.username assigns username to each socket connection to the server
+		socket.username = player.username;
+		io.emit('update-players', players);
+		logger.info('current players', players)
+	})
 
 	//socket listens for 'clear-canvas' event then broadcasts it to clients
 	socket.on('clear-canvas', () => {
@@ -88,7 +98,7 @@ io.on('connection', socket => {
 
 	socket.on('words', initialWords => {
 		words = initialWords;
-		if (word === ''){
+		if (word === '') {
 			word = words[getRandomIndex(words)]
 		}
 		io.emit('update-word', word)
@@ -96,10 +106,10 @@ io.on('connection', socket => {
 	})
 
 	// event listener to remove player from active players and update list for all players
-    socket.on('disconnect', () => {
-        players = players.filter(p => p.username !== socket.username);
-        io.emit('update-players', players);
-        logger.info('current players', players)
-        logger.info('user disconnected');
-    })
+	socket.on('disconnect', () => {
+		players = players.filter(p => p.username !== socket.username);
+		io.emit('update-players', players);
+		logger.info('current players', players)
+		logger.info('user disconnected');
+	})
 })
