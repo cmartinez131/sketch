@@ -15,6 +15,9 @@ let players = [];
 let words = [];
 let word = '';
 
+//Timer for the game
+let roundTime = 60;
+
 function getRandomIndex(array) {
 	return Math.floor(Math.random() * array.length);
 }
@@ -28,6 +31,8 @@ server.listen(config.PORT, () => {
 	logger.info(`Server running on port ${config.PORT}`)
 })
 
+//cors is a middleware that can be used to enable CORS with various options
+//cors origin is set to * to allow all origins
 const io = require('socket.io')(server, {
 	cors: {
 		origin: '*',
@@ -39,6 +44,28 @@ const io = require('socket.io')(server, {
 
 io.on('connection', socket => {
 	logger.info('a user connected')
+
+	setInterval(() => {
+		roundTime--;
+		if (roundTime <= 0) {
+			//Round is over, reset timer
+			roundTime = 60;
+
+			//Find the player who is the drawer
+			let drawerIndex = players.findIndex(player => player.drawer);
+			players[drawerIndex].drawer = false;
+			drawerIndex = (drawerIndex + 1) % players.length;
+			players[drawerIndex].drawer = true;
+
+			word = words[getRandomIndex(words)]
+
+			//Update the players list
+			io.emit('update-players', players)
+			io.emit('update-word', word)
+		}
+
+		io.emit('update-timer', roundTime)
+	}, 1000) // 1000ms = 1s
 
 	// event listener 'chat-message' events and send them to all clients
 	socket.on('chat-message', message => {
@@ -112,4 +139,7 @@ io.on('connection', socket => {
 		logger.info('current players', players)
 		logger.info('user disconnected');
 	})
+
 })
+
+
