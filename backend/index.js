@@ -27,6 +27,27 @@ function isDrawer(username) {
 	return player.drawer
 }
 
+function switchDrawer() {
+	let drawerIndex = players.findIndex(player => player.drawer);
+	players[drawerIndex].drawer = false;
+	drawerIndex = (drawerIndex + 1) % players.length;
+	players[drawerIndex].drawer = true;
+	io.emit('update-players', players);
+}
+
+function generateUnderscores(word) {
+	let underscores = "";
+	for (let i = 0; i < word.length; i++) {
+		if (word[i] === " ") {
+			underscores += ". ";
+		}
+		else {
+			underscores += "_ ";
+		}
+	}
+	return underscores;
+}
+
 server.listen(config.PORT, () => {
 	logger.info(`Server running on port ${config.PORT}`)
 })
@@ -51,17 +72,11 @@ io.on('connection', socket => {
 			//Round is over, reset timer
 			roundTime = 60;
 
-			//Find the player who is the drawer
-			let drawerIndex = players.findIndex(player => player.drawer);
-			players[drawerIndex].drawer = false;
-			drawerIndex = (drawerIndex + 1) % players.length;
-			players[drawerIndex].drawer = true;
+			switchDrawer()
 
 			word = words[getRandomIndex(words)]
-
-			//Update the players list
-			io.emit('update-players', players)
-			io.emit('update-word', word)
+			io.to('drawer').emit('update-word', word);
+			io.to('guesser').emit('update-word', generateUnderscores(word));
 		}
 
 		io.emit('update-timer', roundTime)
@@ -77,13 +92,14 @@ io.on('connection', socket => {
 			if (player) {
 				player.score += 1
 			}
-			//Sort the players by score
-			players.sort((a, b) => b.score - a.score)
+
+			switchDrawer()
 			//Update the players list
 			io.emit('update-players', players)
 
 			word = words[getRandomIndex(words)]
-			io.emit('update-word', word)
+			io.to('drawer').emit('update-word', word);
+			io.to('guesser').emit('update-word', generateUnderscores(word));
 			logger.info('current word', word)
 		}
 	})
@@ -111,10 +127,19 @@ io.on('connection', socket => {
 		if (players.length === 0)
 			player.drawer = true
 		players.push(player);
+		player.rank = players.length
 		// socket.username assigns username to each socket connection to the server
 		socket.username = player.username;
+
 		io.emit('update-players', players);
 		logger.info('current players', players)
+
+		if (player.drawer) {
+			socket.join('drawer');
+		}
+		else {
+			socket.join('guesser');
+		}
 	})
 
 	//socket listens for 'clear-canvas' event then broadcasts it to clients

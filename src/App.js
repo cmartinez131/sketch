@@ -19,6 +19,7 @@ const App = () => {
   const [messages, setMessages] = useState([]); // State to hold sent and received messages
   const [words, setWords] = useState([]); // State to hold the words
   const [word, setWord] = useState('');
+  const [drawer, setDrawer] = useState('');
 
   useEffect(() => {
     categoryService
@@ -62,7 +63,7 @@ const App = () => {
 
   const handleJoin = (player) => {
     setPlayer(player);
-    const newPlayer = { username: player.name, score: 0, drawer: false }
+    const newPlayer = { username: player.name, score: 0, drawer: false, rank: 1 }
     setPlayers(players => [...players, newPlayer])  //add newplayer to players array
     socket.emit('player-joined', newPlayer)  //send 'player-joined' and the new player to the server
     socket.emit('words', words)
