@@ -17,6 +17,7 @@ let word = '';
 
 //Timer for the game
 let roundTime = 60;
+let intervalID = null; //ID for the timer interval
 
 function getRandomIndex(array) {
 	return Math.floor(Math.random() * array.length);
@@ -66,21 +67,22 @@ const io = require('socket.io')(server, {
 io.on('connection', socket => {
 	logger.info('a user connected')
 
-	setInterval(() => {
-		roundTime--;
-		if (roundTime <= 0) {
-			//Round is over, reset timer
-			roundTime = 60;
+	if (intervalID === null)
+		intervalID = setInterval(() => {
+			roundTime--;
+			if (roundTime <= 0) {
+				//Round is over, reset timer
+				roundTime = 60;
 
-			switchDrawer()
+				switchDrawer()
 
-			word = words[getRandomIndex(words)]
-			io.to('drawer').emit('update-word', word);
-			io.to('guesser').emit('update-word', generateUnderscores(word));
-		}
+				word = words[getRandomIndex(words)]
+				io.to('drawer').emit('update-word', word);
+				io.to('guesser').emit('update-word', generateUnderscores(word));
+			}
 
-		io.emit('update-timer', roundTime)
-	}, 1000) // 1000ms = 1s
+			io.emit('update-timer', roundTime)
+		}, 1000) // 1000ms = 1s
 
 	// event listener 'chat-message' events and send them to all clients
 	socket.on('chat-message', message => {
