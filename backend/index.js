@@ -151,9 +151,9 @@ io.on('connection', socket => {
 		}
 	})
 
-	//socket listens for 'clear-canvas' event then broadcasts it to clients
+	//socket listens for 'clear-canvas' event then broadcasts it to all clients
 	socket.on('clear-canvas', () => {
-		socket.broadcast.emit('clear-canvas');
+		io.emit('clear-canvas');
 		logger.info('canvas cleared');
 	});
 

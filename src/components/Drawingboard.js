@@ -68,10 +68,16 @@ const DrawingBoard = ({ socket, player }) => {
         ctx.stroke();//apply the stroke
     }
 
+    //functin to clear the canvas when called
     const clearCanvas = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //no longer emit to other clients here. emitting moved to handleClearButton function
+    };
+
+    //emit to all clients including sender
+    const handleClearButton = () => {
         socket.emit('clear-canvas');
     };
 
@@ -145,7 +151,7 @@ const DrawingBoard = ({ socket, player }) => {
             <button onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}
             </button>
-            <button onClick={clearCanvas}>Clear</button>
+            <button onClick={handleClearButton}>Clear</button>
         </div>
     )
 }
