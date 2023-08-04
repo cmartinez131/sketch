@@ -181,6 +181,16 @@ io.on('connection', socket => {
 				wordGuessed = true;
 			}
 
+			if (correctGuessers.size === players.length - 1) {
+				roundTime = 30;
+				wordGuessed = false;
+				correctGuessers.clear();
+				switchDrawer()
+				word = words[getRandomIndex(words)]
+				io.to('drawer').emit('update-word', word);
+				io.to('guesser').emit('update-word', generateUnderscores(word));
+			}
+
 			// io.emit('update-players', players) //Update the players list
 			// io.to('drawer').emit('update-word', word);
 			// io.to('guesser').emit('update-word', generateUnderscores(word));
@@ -218,6 +228,7 @@ io.on('connection', socket => {
 
 	// event listener to remove player from active players and update list for all players
 	socket.on('disconnect', () => {
+		correctGuessers = new Set(Array.from(correctGuessers).filter(p => p.username !== socket.username));
 		players = players.filter(p => p.username !== socket.username);
 		io.emit('update-players', players);
 		logger.info('current players', players)
