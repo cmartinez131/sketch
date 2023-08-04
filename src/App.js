@@ -22,11 +22,15 @@ const App = () => {
   const [drawer, setDrawer] = useState('');
 
   useEffect(() => {
+    const newSocket = io(ENDPOINT); // Connects endpoint to socket
+    setSocket(newSocket); // Sets socket state to newSocket
+
     categoryService
       .getAll()
       .then(response => {
         const newWords = response.data[0].words
         setWords(newWords);
+        newSocket.emit('words', newWords) //send 'words' and the new words to the server
       })
   }, [])
 
@@ -77,7 +81,7 @@ const App = () => {
         {/* first loads the join page */}
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} />} />
-          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word}/>} />
+          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} />} />
         </Routes>
       </Router>
     </>

@@ -21,7 +21,8 @@ const Guess = ({ player, messages, sendMessage }) => {
                 <ul>
                     {messages.map((message, i) =>
                         <li key={i} style={{ backgroundColor: i % 2 === 0 ? 'white' : 'lightblue' }}>
-                            <b>{message.user}</b>: {message.text}
+                            <b>{message.user !== 'System' ? `${message.user}: ` : ''}</b>
+                            <strong style={{ color: message.user === 'System' ? message.color : 'black' }}>{message.text}</strong>
                         </li>
                     )}
                 </ul>

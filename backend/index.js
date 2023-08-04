@@ -15,9 +15,10 @@ let players = [];
 let words = [];
 let word = '';
 
-//Timer for the game
-let roundTime = 60;
+let roundTime = 30;//Timer for the game
 let intervalID = null; //ID for the timer interval
+let wordGuessed = false; //Boolean to check if the word has been guessed
+let correctGuessers = new Set(); //Set to store the players who have guessed the word correctly
 
 function getRandomIndex(array) {
 	return Math.floor(Math.random() * array.length);
@@ -31,9 +32,23 @@ function isDrawer(username) {
 function switchDrawer() {
 	let drawerIndex = players.findIndex(player => player.drawer);
 	players[drawerIndex].drawer = false;
+	let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the old drawer
+	oldDrawerSocket.leave('drawer');
+	oldDrawerSocket.join('guesser'); // Move the old drawer's socket to the 'guesser' room
 	drawerIndex = (drawerIndex + 1) % players.length;
 	players[drawerIndex].drawer = true;
+	let newDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the new drawer
+	newDrawerSocket.leave('guesser');
+	newDrawerSocket.join('drawer'); // Move the new drawer's socket to the 'drawer' room
 	io.emit('update-players', players);
+
+	// get the socket ids of the new drawer and the new guesser
+	let newDrawerSocketId = players[drawerIndex].socketId;
+	let newGuesserSocketId = players[(drawerIndex + 1) % players.length].socketId;
+
+	// send the 'update-word' event to the new drawer and the new guesser
+	io.to(newDrawerSocketId).emit('update-word', word);
+	io.to(newGuesserSocketId).emit('update-word', generateUnderscores(word));
 }
 
 function generateUnderscores(word) {
@@ -63,22 +78,70 @@ const io = require('socket.io')(server, {
 
 //socket.broadcast.emit method sends a message to all connected clients except for the client that initiated the event
 //io.emit method sends a message to all connected clients, including the client that initiated the event.
-
 io.on('connection', socket => {
 	logger.info('a user connected')
+	socket.on('words', initialWords => {
+		words = initialWords;
+		if (word === '') {
+			word = words[getRandomIndex(words)]
+			io.to('drawer').emit('update-word', word)
+			io.to('guesser').emit('update-word', generateUnderscores(word))
+		}
+		io.emit('update-words', words)
+		//
+		//
+		logger.info('current word', word)
+	})
+
+	// event listener that adds players to active players and sends updated players list
+	socket.on('player-joined', player => {
+		if (players.length === 0) {
+			player.drawer = true
+			io.to('drawer').emit('update-word', word);
+			io.to('guesser').emit('update-word', generateUnderscores(word));
+		}
+		player.socketId = socket.id; // socket.id assigns a unique id to each socket connection to the server
+		players.push(player);
+		player.rank = players.length
+		// socket.username assigns username to each socket connection to the server
+		socket.username = player.username;
+
+		io.emit('update-players', players);
+		logger.info('current players', players)
+
+		if (word === '') {
+			word = words[getRandomIndex(words)];
+		}
+
+		if (player.drawer) {
+			socket.join('drawer');
+			io.to('drawer').emit('update-word', word);
+			console.log('drawer word emited', word)
+		}
+		else {
+			socket.join('guesser');
+			io.to('guesser').emit('update-word', generateUnderscores(word));
+			console.log('guesser word emited', word)
+		}
+
+	})
+
 
 	if (intervalID === null)
 		intervalID = setInterval(() => {
 			roundTime--;
 			if (roundTime <= 0) {
 				//Round is over, reset timer
-				roundTime = 60;
+				roundTime = 30;
+				wordGuessed = false;
+				correctGuessers.clear();
 
 				switchDrawer()
 
 				word = words[getRandomIndex(words)]
 				io.to('drawer').emit('update-word', word);
 				io.to('guesser').emit('update-word', generateUnderscores(word));
+				logger.info('current word', word)
 			}
 
 			io.emit('update-timer', roundTime)
@@ -87,24 +150,39 @@ io.on('connection', socket => {
 	// event listener 'chat-message' events and send them to all clients
 	socket.on('chat-message', message => {
 		logger.info(message)
-		io.emit('chat-message', message) // send to all clients
+
+		//Check if the message is the word
 		if (message.text === word && !isDrawer(message.user)) {
-			//Find the player who guessed correctly
-			const player = players.find((p) => p.username === message.user)
-			if (player) {
-				player.score += 1
+			if (!correctGuessers.has(message.user)) {
+
+				//Calculate the points to award the player
+				const points = Math.max(1, Math.ceil(roundTime * 2))
+
+				//Find the player who guessed correctly
+				const player = players.find((p) => p.username === message.user)
+				if (player) {
+					player.score += points
+				}
+				//Add the player to the set of correct guessers
+				correctGuessers.add(message.user)
+
+				io.emit('chat-message', { user: 'System', color: 'lightgreen', text: `${message.user} guessed the word!` })
+			}
+			const drawer = players.find((p) => p.drawer)
+			if (drawer && !wordGuessed) {
+				drawer.score += 200
+				wordGuessed = true;
 			}
 
-			switchDrawer()
-			//Update the players list
-			io.emit('update-players', players)
-
-			word = words[getRandomIndex(words)]
-			io.to('drawer').emit('update-word', word);
-			io.to('guesser').emit('update-word', generateUnderscores(word));
+			// io.emit('update-players', players) //Update the players list
+			// io.to('drawer').emit('update-word', word);
+			// io.to('guesser').emit('update-word', generateUnderscores(word));
 			logger.info('current word', word)
 		}
-	})
+		else {
+			io.emit('chat-message', message);
+		}
+	});
 
 	// event listeners for 'start-drawing' events and sends them to all clients
 	socket.on('start-drawing', ({ clientX, clientY, color, width }) => {
@@ -124,40 +202,12 @@ io.on('connection', socket => {
 		logger.info('a user stopped drawing')
 	});
 
-	// event listener that adds players to active players and sends updated players list
-	socket.on('player-joined', player => {
-		if (players.length === 0)
-			player.drawer = true
-		players.push(player);
-		player.rank = players.length
-		// socket.username assigns username to each socket connection to the server
-		socket.username = player.username;
-
-		io.emit('update-players', players);
-		logger.info('current players', players)
-
-		if (player.drawer) {
-			socket.join('drawer');
-		}
-		else {
-			socket.join('guesser');
-		}
-	})
 
 	//socket listens for 'clear-canvas' event then broadcasts it to clients
 	socket.on('clear-canvas', () => {
 		socket.broadcast.emit('clear-canvas');
 		logger.info('canvas cleared');
 	});
-
-	socket.on('words', initialWords => {
-		words = initialWords;
-		if (word === '') {
-			word = words[getRandomIndex(words)]
-		}
-		io.emit('update-word', word)
-		logger.info('current word', word)
-	})
 
 	// event listener to remove player from active players and update list for all players
 	socket.on('disconnect', () => {
@@ -166,6 +216,12 @@ io.on('connection', socket => {
 		logger.info('current players', players)
 		logger.info('user disconnected');
 	})
+
+	//If no players are left, clear the interval
+	if (players.length === 0 && intervalID !== null) {
+		clearInterval(intervalID);
+		intervalID = null;
+	}
 
 })
 
