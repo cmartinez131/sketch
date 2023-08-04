@@ -135,3 +135,10 @@ ul {
 .currentWord {
     font-size: 40px;
 }
+
+.color-button {
+    width: 60px;
+    height: 40px;
+    margin: 3px;
+    border-radius: 5px;
+}

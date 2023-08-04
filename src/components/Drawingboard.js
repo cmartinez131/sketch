@@ -6,6 +6,18 @@ import '../styles.css'
 //mouse move. Create event listeners and socket conenctions so server can update
 //permission states when there is a new word
 
+//colors in english: black, blue, red, yellow, pink, green, orange
+const colors = ['#000000', '#0000ff', '#ff0000', '#ffd700', '#ff80ed', '#00ff00', '#ffa500', '#cccccc']
+const ColorButton = ({ color, setColor }) => (
+    <button
+        className='color-button'
+        style={{ backgroundColor: color }}
+        onClick={() => setColor(color)}
+    >
+    </button>
+);
+
+
 //define DrawingBoard component
 const DrawingBoard = ({ socket, player }) => {
     //use the react useRef hook to get a reference to the canvas DOM element
@@ -19,7 +31,7 @@ const DrawingBoard = ({ socket, player }) => {
     const [permissionState, setPermissionState] = useState(null)
 
     //define function to handle mousedown event: emit 'start-drawing' event to server and all clients
-    const handleMouseDown = (event) => {    
+    const handleMouseDown = (event) => {
         //ask permission from server before player can initiate drawing
         socket.emit('request-permission', { username: player.name });
 
@@ -68,10 +80,16 @@ const DrawingBoard = ({ socket, player }) => {
         ctx.stroke();//apply the stroke
     }
 
+    //functin to clear the canvas when called
     const clearCanvas = () => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //no longer emit to other clients here. emitting moved to handleClearButton function
+    };
+
+    //emit to all clients including sender
+    const handleClearButton = () => {
         socket.emit('clear-canvas');
     };
 
@@ -81,7 +99,7 @@ const DrawingBoard = ({ socket, player }) => {
         canvas.addEventListener('mousedown', handleMouseDown);
         canvas.addEventListener('mouseup', handleMouseUp);
         canvas.addEventListener('mousemove', handleMouseMove);
-        
+
         socket.on('start-drawing', ({ clientX, clientY, color, width }) => {
             setIsDrawing(true);
             const canvas = canvasRef.current;
@@ -111,7 +129,7 @@ const DrawingBoard = ({ socket, player }) => {
 
         // event listener tells socket to clear canvas when it gets 'clear-canvas' events
         socket.on('clear-canvas', clearCanvas);
-        
+
         // Cleanup function to remove event listeners
         return () => {
             canvas.removeEventListener('mousedown', handleMouseDown);
@@ -123,15 +141,11 @@ const DrawingBoard = ({ socket, player }) => {
     return (
         <div>
             <canvas ref={canvasRef} className="drawing-board" width={600} height={600} />
+            Colors: 
+            {colors.map((color, index) =>
+                <ColorButton key={index} color={color} setColor={setColor} />
+            )}
             <br />
-            <label>
-                Color:
-                <input
-                    type="color"
-                    value={color}
-                    onChange={penColor => setColor(penColor.target.value)}
-                />
-            </label>
             <label>
                 Width:
                 <input
@@ -145,7 +159,7 @@ const DrawingBoard = ({ socket, player }) => {
             <button onClick={() => setMode(mode === 'draw' ? 'erase' : 'draw')}>
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}
             </button>
-            <button onClick={clearCanvas}>Clear</button>
+            <button onClick={handleClearButton}>Clear</button>
         </div>
     )
 }
