@@ -222,8 +222,14 @@ io.on('connection', socket => {
 
 	//socket listens for 'clear-canvas' event then broadcasts it to all clients
 	socket.on('clear-canvas', () => {
-		io.emit('clear-canvas');
-		logger.info('canvas cleared');
+		logger.info("rooms", socket.rooms)
+		if (socket.rooms.has('drawer')){
+			io.emit('clear-canvas');
+			logger.info('canvas cleared');
+		}
+		else {
+			logger.info('socket not authorized to clear canvas');
+		}
 	});
 
 	// event listener to remove player from active players and update list for all players
