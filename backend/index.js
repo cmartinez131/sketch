@@ -147,6 +147,13 @@ io.on('connection', socket => {
 			io.emit('update-timer', roundTime)
 		}, 1000) // 1000ms = 1s
 
+		// event listener to listen for clients requesting to draw
+	socket.on('request-permission', ({ username }) => {
+		const hasPermission = isDrawer(username);
+		// emit a 'permission-response' event back to the client wether or not user is drawer
+		socket.emit('permission-response', { hasPermission });
+	});
+
 	// event listener 'chat-message' events and send them to all clients
 	socket.on('chat-message', message => {
 		logger.info(message)

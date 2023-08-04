@@ -24,7 +24,7 @@ const Game = ({ player, players, socket, messages, sendMessage, word }) => {
       <div className='middle'>
         <Timer socket={socket} />
         <h2 className='currentWord'>{word}</h2>
-        <DrawingBoard socket={socket} />
+        <DrawingBoard socket={socket} player={player}/>
       </div>
       <div className='right'>
         <Guess player={player} messages={messages} sendMessage={sendMessage} />
