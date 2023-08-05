@@ -40,6 +40,8 @@ function switchDrawer() {
 	let newDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the new drawer
 	newDrawerSocket.leave('guesser');
 	newDrawerSocket.join('drawer'); // Move the new drawer's socket to the 'drawer' room
+
+	io.emit('clear-canvas');
 	io.emit('update-players', players);
 
 	// get the socket ids of the new drawer and the new guesser
