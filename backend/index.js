@@ -9,6 +9,7 @@ const socketio = require('socket.io')
 const { Server } = require('socket.io');
 
 const cors = require('cors')
+const { runInContext } = require('vm')
 
 // array to store the active players on server
 let players = [];
@@ -20,6 +21,28 @@ let intervalID = null; //ID for the timer interval
 let wordGuessed = false; //Boolean to check if the word has been guessed
 let correctGuessers = new Set(); //Set to store the players who have guessed the word correctly
 
+function startGame() {
+	if (players.length >= 2 && intervalID === null)
+		intervalID = setInterval(() => {
+			roundTime--;
+			if (roundTime <= 0) {
+				//Round is over, reset timer
+				roundTime = 30;
+				wordGuessed = false;
+				correctGuessers.clear();
+
+				switchDrawer()
+
+				word = words[getRandomIndex(words)]
+				io.to('drawer').emit('update-word', word);
+				io.to('guesser').emit('update-word', generateUnderscores(word));
+				logger.info('current word', word)
+			}
+
+			io.emit('update-timer', roundTime)
+		}, 1000) // 1000ms = 1s
+}
+
 function getRandomIndex(array) {
 	return Math.floor(Math.random() * array.length);
 }
@@ -30,11 +53,17 @@ function isDrawer(username) {
 }
 
 function switchDrawer() {
+	if (players.length === 0) return;
+
 	let drawerIndex = players.findIndex(player => player.drawer);
-	players[drawerIndex].drawer = false;
-	let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the old drawer
-	oldDrawerSocket.leave('drawer');
-	oldDrawerSocket.join('guesser'); // Move the old drawer's socket to the 'guesser' room
+
+	if (drawerIndex !== -1) {
+		players[drawerIndex].drawer = false;
+		let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the old drawer
+		oldDrawerSocket.leave('drawer');
+		oldDrawerSocket.join('guesser'); // Move the old drawer's socket to the 'guesser' room
+	}
+
 	drawerIndex = (drawerIndex + 1) % players.length;
 	players[drawerIndex].drawer = true;
 	let newDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the new drawer
@@ -81,7 +110,7 @@ const io = require('socket.io')(server, {
 //socket.broadcast.emit method sends a message to all connected clients except for the client that initiated the event
 //io.emit method sends a message to all connected clients, including the client that initiated the event.
 io.on('connection', socket => {
-	logger.info('a user connected')
+	logger.info('a user connected', socket.id)
 	socket.on('words', initialWords => {
 		words = initialWords;
 		if (word === '') {
@@ -90,8 +119,6 @@ io.on('connection', socket => {
 			io.to('guesser').emit('update-word', generateUnderscores(word))
 		}
 		io.emit('update-words', words)
-		//
-		//
 		logger.info('current word', word)
 	})
 
@@ -125,31 +152,11 @@ io.on('connection', socket => {
 			io.to('guesser').emit('update-word', generateUnderscores(word));
 			console.log('guesser word emited', word)
 		}
-
+		startGame();
 	})
 
 
-	if (intervalID === null)
-		intervalID = setInterval(() => {
-			roundTime--;
-			if (roundTime <= 0) {
-				//Round is over, reset timer
-				roundTime = 30;
-				wordGuessed = false;
-				correctGuessers.clear();
-
-				switchDrawer()
-
-				word = words[getRandomIndex(words)]
-				io.to('drawer').emit('update-word', word);
-				io.to('guesser').emit('update-word', generateUnderscores(word));
-				logger.info('current word', word)
-			}
-
-			io.emit('update-timer', roundTime)
-		}, 1000) // 1000ms = 1s
-
-		// event listener to listen for clients requesting to draw
+	// event listener to listen for clients requesting to draw
 	socket.on('request-permission', ({ username }) => {
 		const hasPermission = isDrawer(username);
 		// emit a 'permission-response' event back to the client wether or not user is drawer
@@ -193,9 +200,6 @@ io.on('connection', socket => {
 				io.to('guesser').emit('update-word', generateUnderscores(word));
 			}
 
-			// io.emit('update-players', players) //Update the players list
-			// io.to('drawer').emit('update-word', word);
-			// io.to('guesser').emit('update-word', generateUnderscores(word));
 			logger.info('current word', word)
 		}
 		else {
@@ -225,7 +229,7 @@ io.on('connection', socket => {
 	//socket listens for 'clear-canvas' event then broadcasts it to all clients
 	socket.on('clear-canvas', () => {
 		logger.info("rooms", socket.rooms)
-		if (socket.rooms.has('drawer')){
+		if (socket.rooms.has('drawer')) {
 			io.emit('clear-canvas');
 			logger.info('canvas cleared');
 		}
@@ -237,17 +241,22 @@ io.on('connection', socket => {
 	// event listener to remove player from active players and update list for all players
 	socket.on('disconnect', () => {
 		correctGuessers = new Set(Array.from(correctGuessers).filter(p => p.username !== socket.username));
+		const wasDrawer = players.some(p => p.username === socket.username && p.drawer);
 		players = players.filter(p => p.username !== socket.username);
+		if (wasDrawer) {
+			switchDrawer()
+		}
 		io.emit('update-players', players);
-		logger.info('current players', players)
+		logger.info('current players', players.length)
 		logger.info('user disconnected');
-	})
 
-	//If no players are left, clear the interval
-	if (players.length === 0 && intervalID !== null) {
-		clearInterval(intervalID);
-		intervalID = null;
-	}
+		//If no players are left, clear the interval
+		if (players.length < 2 && intervalID !== null) {
+			clearInterval(intervalID);
+			intervalID = null;
+			logger.info('interval cleared')
+		}
+	})
 
 })
 
