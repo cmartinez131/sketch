@@ -32,11 +32,11 @@ const App = () => {
         setWords(newWords);
         newSocket.emit('words', newWords) //send 'words' and the new words to the server
       })
-  }, [])
+  // }, [])
 
-  useEffect(() => {
-    const newSocket = io(ENDPOINT);
-    setSocket(newSocket);
+  // useEffect(() => {
+    // const newSocket = io(ENDPOINT);
+    // setSocket(newSocket);
 
     // listen for the 'chat-message' event from the server. it appends the old message list with new message
     newSocket.on('chat-message', data => {
