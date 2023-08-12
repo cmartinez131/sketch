@@ -238,6 +238,18 @@ io.on('connection', socket => {
 		}
 	});
 
+	//socket listens for 'undo-drawing' event then broadcasts it to all clients
+	socket.on('undo-drawing', () => {
+		logger.info("rooms", socket.rooms)
+		if (socket.rooms.has('drawer')) {
+			io.emit('undo-drawing');
+			logger.info('undo button click sent by socket to clients');
+		}
+		else {
+			logger.info('socket not authorized to undo move');
+		}
+	});
+
 	// event listener to remove player from active players and update list for all players
 	socket.on('disconnect', () => {
 		correctGuessers = new Set(Array.from(correctGuessers).filter(p => p.username !== socket.username));
