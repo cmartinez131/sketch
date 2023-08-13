@@ -83,7 +83,7 @@ const App = () => {
         <Navbar />
         {/* first loads the join page */}
         <Routes>
-          <Route path="/" element={<Join onJoin={handleJoin} />} />
+          <Route path="/" element={<Join onJoin={handleJoin} socket={socket}/>} />
           <Route path="/ready" element={<Ready currentPlayer={player} players={players} setPlayers={setPlayers} socket={socket} />} />
           <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} />} />
         </Routes>

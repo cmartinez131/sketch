@@ -7,17 +7,30 @@ import FreeDrawBoard from '../components/FreeDrawBoard';
 
 const Ready = ({ currentPlayer, players, setPlayers, socket }) => {
 
-  const handleStartGame = () => {
-    if (socket) {
-      //need send some event to the server to let it know that all players are ready and start the game if all players are ready
-      socket.emit('start-game');  //right now, server doesn't do anything with this message
+  const handleStartGameButton = () => {
+    //need send some event to the server to let it know that all players are ready and start the game if all players are ready
+    //over here check if all players are ready
+    const atLeastTwoPlayers = players.length >= 2;
+    const allPlayersReady = players.every(player => player.ready);
+
+    if (atLeastTwoPlayers && allPlayersReady) {
+      socket.emit('start-game');  //only emit the 'start-game' message if there are at least two players and all players are ready
+    } else if (!atLeastTwoPlayers) {
+      alert('You need at least two players to start the game. You can still free draw with other players.')
+    } else {
+      alert('All players must be ready to start the game. You can still free draw with other players.')
     }
-    navigate('/game');  //go to the game screen
   }
+
+  //maybe if game has started, user sees a join button instead
 
   const navigate = useNavigate();
 
-  //this part not working
+  const handleGameStarted = () => {
+    navigate('/game');
+  };
+
+
   const handleReady = (playerToToggle) => {
     // create a new array of players with same players but the specific player's ready status is toggled
     const updatedPlayers = players.map(player =>
@@ -32,26 +45,40 @@ const Ready = ({ currentPlayer, players, setPlayers, socket }) => {
     // send just the toggled player's data to the server
     const updatedPlayer = updatedPlayers.find(p => p.username === playerToToggle.username);
     socket.emit('toggle-ready', updatedPlayer);//toggle ready of the player on the server to update for all clients
-    //need to create event listener on client and server for 'toggle-ready' of 'update-players'
+
+    // listen for the 'update-players' event from the server. it updates the players list when player clicks ready
+    socket.on('update-players', updatedPlayers => {
+      setPlayers(updatedPlayers);
+    })
   };
+
+  //call the handleGameStarted function when client recieves 'game-started' from server
+  socket.on('game-started', handleGameStarted);
+
   return (
     <div className='container'>
       <div className="left ready-list-container">
-      <h1>Get Ready!</h1>
-      <h2>Game will start when all players are ready.</h2>
-      <PlayerList players={players} />
-      <h3>Players in lobby:</h3>
-        {players.map((player, index) => (
-          <div key={index}>
-            <span className="player-name">{player.username}</span> - {player.ready ? 'Player Ready ' : 'Player Not Ready '}
-            {player.username === currentPlayer.name &&
-              <button onClick={() => handleReady(player)} className='ready-button'>
-                {player.ready ? 'Unready' : 'Get Ready'}
-              </button>}
-          </div>
-        ))}
-        {/* right now the button just lets join join the game that already started */}
-        <button onClick={handleStartGame} className='start-game-button'>Start Game</button>
+        <h1>Get Ready!</h1>
+        <h2>Press Start Game when all players are ready.</h2>
+        <h3>Players in lobby:</h3>
+        <div className="ready-players-container">
+          {players.map((player, index) => (
+            <div key={index} className="player-container">
+              <span className="player-name">{player.username}{player.username === currentPlayer.name && " (you)"}</span>
+              <span className='ready-status'>{player.ready ? "- Player Ready" : "- Player Not Ready"}</span>
+              {player.username === currentPlayer.name ? (
+                <button onClick={() => handleReady(player)} className='ready-button'>
+                  {player.ready ? 'Unready' : 'Get Ready'}
+                </button>
+              ) : (
+                <div className="fake-button-placeholder"></div>
+              )}
+            </div>
+          ))}
+        </div>
+        {/* start game starts the game */}
+        {/* maybe check if the game has started. if the game has started, make it a "join" button instead */}
+        <button onClick={handleStartGameButton} className='start-game-button'>Start Game</button>
       </div>
       <div className="right free-draw-container">
         <h1>Free Draw!</h1>

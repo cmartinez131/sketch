@@ -2,14 +2,23 @@ import { useNavigate } from 'react-router-dom';
 import JoinGameForm from '../components/JoinGameForm';
 import '../styles.css'
 
-const Join = ({ onJoin }) => {
+const Join = ({ onJoin, socket }) => {
   
   const navigate = useNavigate(); // for navigation with react router
   const handleJoin = (event) => {
     //onJoin is passed as a prop from the app.js component
     //will pass the username up to the app component to save across app
     onJoin(event);
-    navigate('/ready');  //go to game screen
+
+    socket.emit('check-game-status');
+    socket.on('game-status-response', (hasStarted) => {
+      if (hasStarted) {
+        navigate('/game'); //go straight to game screen ig game already started
+      }
+      else {
+        navigate('/ready');  //go to waiting room screen
+      }
+    })
   };
 
   return (

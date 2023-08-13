@@ -16,6 +16,8 @@ let players = [];
 let words = [];
 let word = '';
 
+let gameHasStarted = false;
+
 let roundTime = 30;//Timer for the game
 let intervalID = null; //ID for the timer interval
 let wordGuessed = false; //Boolean to check if the word has been guessed
@@ -122,6 +124,21 @@ io.on('connection', socket => {
 		logger.info('current word', word)
 	})
 
+	//client asks server if game has started yet and server response with gameHasStarted status
+	socket.on('check-game-status', () => {
+        socket.emit('game-status-response', gameHasStarted);
+    });
+
+	socket.on('toggle-ready', updatedPlayer => {
+		const playerToUpdate = players.find(player => player.username === updatedPlayer.username);
+		if (playerToUpdate) {
+			playerToUpdate.ready = updatedPlayer.ready;
+		}
+		 // send the updated players list to all clients
+		 io.emit('update-players', players);
+		 logger.info('Player ready status toggled', updatedPlayer);
+	});
+
 	// Event listeners for free-draw feature that is used by the free-draw canvas
 	// Event listener for 'start-free-drawing'
     socket.on('start-free-drawing', ({ clientX, clientY, color, width }) => {
@@ -147,6 +164,15 @@ io.on('connection', socket => {
         logger.info('a user cleared the canvas');
     });
 	// End of free-draw event listeners
+
+	// Listen for 'start-game' event
+	socket.on('start-game', () => {
+		// sends a 'game-started' event to all the clients
+		startGame();
+		gameHasStarted = true;
+		io.emit('game-started');
+		logger.info('Game has started');
+	});
 
 	// event listener that adds players to active players and sends updated players list
 	socket.on('player-joined', player => {
@@ -178,7 +204,7 @@ io.on('connection', socket => {
 			io.to('guesser').emit('update-word', generateUnderscores(word));
 			console.log('guesser word emited', word)
 		}
-		startGame();
+		// startGame();	//startGame moved to when startGame button clicked
 	})
 
 

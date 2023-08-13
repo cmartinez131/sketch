@@ -35,7 +35,6 @@ body {
 
 .ready-list-container {
     flex-direction: column;
-    align-self: flex-start;
 }
 
 .free-draw-container {
@@ -44,10 +43,6 @@ body {
 
 .free-draw-container h1 {
     text-align: center;
-}
-
-.player-name {
-    font-weight: bold;
 }
 
 .drawing-board {
@@ -163,14 +158,30 @@ ul {
 
 .start-game-button, .ready-button {
     font-size: 24px;
-    padding: 10px 20px;
+    padding: 10px;
     border: none;
     border-radius: 5px;
-    margin-top: 10px;
+    
     cursor: pointer;
     transition: background-color 0.2s ease, transform 0.2s ease;
     display: inline-block;
     text-align: center;
+}
+
+.lobby-players-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.player-name {
+    font-size: 24px;
+    font-weight: bold;
+    padding: 10px;
+}
+
+.ready-status {
+    font-size: 20px;
 }
 
 .start-game-button:hover, .ready-button:hover {
@@ -193,6 +204,25 @@ ul {
     border: 2px solid #ddd;
 }
 
+.ready-players-container {
+    align-items: center;
+    padding: 1rem;
+}
+
+.player-container {
+    display: flex;
+    align-items: center;
+    height: 50px;
+}
+
 .ready-button:hover {
     background-color: #e2e2e2;
 }
+
+.ready-button, .fake-button-placeholder {
+    margin-left: 10px;
+}
+
+.ready-button-placeholder {
+    width: 100px; 
+  }
