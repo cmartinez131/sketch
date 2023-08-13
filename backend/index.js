@@ -122,6 +122,32 @@ io.on('connection', socket => {
 		logger.info('current word', word)
 	})
 
+	// Event listeners for free-draw feature that is used by the free-draw canvas
+	// Event listener for 'start-free-drawing'
+    socket.on('start-free-drawing', ({ clientX, clientY, color, width }) => {
+        socket.broadcast.emit('start-free-drawing', { clientX, clientY, color, width });
+        logger.info('a user started drawing');
+    });
+
+    // Event listener for 'free-drawing'
+    socket.on('free-drawing', ({ clientX, clientY, color, width }) => {
+        socket.broadcast.emit('free-drawing', { clientX, clientY, color, width });
+        // logger.info('a user is drawing');
+    });
+
+    // Event listener for 'stop-free-drawing'
+    socket.on('stop-free-drawing', () => {
+        socket.broadcast.emit('stop-free-drawing');
+        logger.info('a user stopped drawing');
+    });
+
+    // Event listener for 'clear-canvas'
+    socket.on('clear-free-canvas', () => {
+        io.emit('clear-free-canvas');
+        logger.info('a user cleared the canvas');
+    });
+	// End of free-draw event listeners
+
 	// event listener that adds players to active players and sends updated players list
 	socket.on('player-joined', player => {
 		if (players.length === 0) {
