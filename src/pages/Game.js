@@ -6,7 +6,7 @@ import PlayerList from '../components/PlayerList';
 import Timer from '../components/Timer';
 import '../styles.css'
 
-const Game = ({ player, players, socket, messages, sendMessage, word }) => {
+const Game = ({ player, players, socket, messages, sendMessage, word, round }) => {
 
   const navigate = useNavigate();
 
@@ -14,11 +14,15 @@ const Game = ({ player, players, socket, messages, sendMessage, word }) => {
     if (!player) {
       navigate('/');
     }
-  }, [player, navigate]);
+    if (round === 4) {
+      navigate('/endGame');
+    }
+  }, [player, navigate, round]);
 
   return (
     <div className='container'>
       <div className='left'>
+        <h2 className='round'>{round}</h2>
         <PlayerList players={players} />
       </div>
       <div className='middle'>

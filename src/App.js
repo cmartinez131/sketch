@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Game from './pages/Game';
 import Join from './pages/Join';
 import Ready from './pages/Ready';
+import End from './pages/EndGame';
 import categoryService from './services/categories'
 import userService from './services/users'
 
@@ -21,6 +22,7 @@ const App = () => {
   const [words, setWords] = useState([]); // State to hold the words
   const [word, setWord] = useState('');
   const [drawer, setDrawer] = useState('');
+  const [round, setRound] = useState(1);
 
   useEffect(() => {
     const newSocket = io(ENDPOINT); // Connects endpoint to socket
@@ -54,6 +56,10 @@ const App = () => {
       setWord(updatedWord);
     })
 
+    newSocket.on('update-round', updatedRound => {
+      setRound(updatedRound);
+    })
+
     // cleanup function to disconnect the socket from the server when component unmounts
     return () => {
       newSocket.disconnect();
@@ -85,7 +91,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} socket={socket}/>} />
           <Route path="/ready" element={<Ready currentPlayer={player} players={players} setPlayers={setPlayers} socket={socket} />} />
-          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} />} />
+          <Route path="/endGame" element={<End players={players} socket={socket}></End>}></Route>
         </Routes>
       </Router>
     </>
