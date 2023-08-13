@@ -9,7 +9,7 @@ const Join = ({ onJoin }) => {
     //onJoin is passed as a prop from the app.js component
     //will pass the username up to the app component to save across app
     onJoin(event);
-    navigate('/game');  //go to game screen
+    navigate('/ready');  //go to game screen
   };
 
   return (
