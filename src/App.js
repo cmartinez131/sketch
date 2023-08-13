@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 import Navbar from './components/Navbar';
 import Game from './pages/Game';
 import Join from './pages/Join';
+import Ready from './pages/Ready';
 import End from './pages/EndGame';
 import categoryService from './services/categories'
 import userService from './services/users'
@@ -73,11 +74,13 @@ const App = () => {
 
   const handleJoin = (player) => {
     setPlayer(player);
-    const newPlayer = { username: player.name, score: 0, drawer: false, rank: 1 }
+    const newPlayer = { username: player.name, score: 0, drawer: false, rank: 1, ready: false }
     setPlayers(players => [...players, newPlayer])  //add newplayer to players array
     socket.emit('player-joined', newPlayer)  //send 'player-joined' and the new player to the server
     socket.emit('words', words)
   }
+
+  
 
   // Pass socket and players to the Game component
   return (
@@ -86,8 +89,8 @@ const App = () => {
         <Navbar />
         {/* first loads the join page */}
         <Routes>
-          <Route path="/" element={<Join onJoin={handleJoin} />} />
-          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} round={round} />} />
+          <Route path="/" element={<Join onJoin={handleJoin} socket={socket}/>} />
+          <Route path="/ready" element={<Ready currentPlayer={player} players={players} setPlayers={setPlayers} socket={socket} />} />
           <Route path="/endGame" element={<End players={players} socket={socket}></End>}></Route>
         </Routes>
       </Router>
