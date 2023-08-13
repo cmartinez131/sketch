@@ -15,11 +15,13 @@ const { runInContext } = require('vm')
 let players = [];
 let words = [];
 let word = '';
+let round = 1;
 
 let roundTime = 30;//Timer for the game
 let intervalID = null; //ID for the timer interval
 let wordGuessed = false; //Boolean to check if the word has been guessed
 let correctGuessers = new Set(); //Set to store the players who have guessed the word correctly
+let alreadyDrawed = new Set();
 
 function startGame() {
 	if (players.length >= 2 && intervalID === null)
@@ -62,6 +64,14 @@ function switchDrawer() {
 		let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId); // Get the socket of the old drawer
 		oldDrawerSocket.leave('drawer');
 		oldDrawerSocket.join('guesser'); // Move the old drawer's socket to the 'guesser' room
+	}
+
+	alreadyDrawed.add(players[drawerIndex].username)
+	const allPlayersDrawn = players.every(player => alreadyDrawed.has(player.username))
+	if (allPlayersDrawn){
+		alreadyDrawed.clear()
+		round += 1
+		io.emit('update-round', round);
 	}
 
 	drawerIndex = (drawerIndex + 1) % players.length;
