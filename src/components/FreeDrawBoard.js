@@ -122,7 +122,8 @@ const FreeDrawBoard = ({ socket, player }) => {
 
     return (
         <div>
-            <canvas ref={canvasRef} className="drawing-board" width={600} height={600} />
+            <canvas ref={canvasRef} className="drawing-board" width={700} height={600} />
+            <br />
             Colors: 
             {colors.map((color, index) =>
                 <ColorButton key={index} color={color} setColor={setColor} />

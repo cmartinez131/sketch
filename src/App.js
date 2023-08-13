@@ -91,6 +91,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Join onJoin={handleJoin} socket={socket}/>} />
           <Route path="/ready" element={<Ready currentPlayer={player} players={players} setPlayers={setPlayers} socket={socket} />} />
+          <Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} round={round} />} />
           <Route path="/endGame" element={<End players={players} socket={socket}></End>}></Route>
         </Routes>
       </Router>

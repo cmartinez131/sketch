@@ -42,6 +42,11 @@ body {
     align-self: flex-start;
 }
 
+.free-draw-container h1{
+    text-align: center;
+    margin-right: 20px;
+}
+
 .free-draw-container h1 {
     text-align: center;
 }
@@ -182,6 +187,7 @@ ul {
 
 .ready-status {
     font-size: 20px;
+    width: 160px;
 }
 
 .start-game-button:hover, .ready-button:hover {
@@ -202,6 +208,8 @@ ul {
     background-color: #f4f4f4; 
     color: #333;
     border: 2px solid #ddd;
+    width: 160px;
+    align-items: center;
 }
 
 .ready-players-container {
