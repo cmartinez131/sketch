@@ -81,7 +81,17 @@ const DrawingBoard = ({ socket, player }) => {
     }
 
     //functin to clear the canvas when called
+    //called when 
     const clearCanvas = () => {
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //no longer emit to other clients here. emitting moved to handleClearButton function
+    };
+
+    const undoLastMove = () => {
+        console.log("undo-event received by socket")
+        //put undo logic. now it just clears the screen
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -91,6 +101,9 @@ const DrawingBoard = ({ socket, player }) => {
     //emit to all clients including sender
     const handleClearButton = () => {
         socket.emit('clear-canvas');
+    };
+    const handleUndoButton = () => {
+        socket.emit('undo-drawing');
     };
 
     // Use the useEffect hook to add event listeners
@@ -127,8 +140,11 @@ const DrawingBoard = ({ socket, player }) => {
             ctx.beginPath();
         });
 
-        // event listener tells socket to clear canvas when it gets 'clear-canvas' events
+        // event listener listens for 'clear-canvas' events and calls clearCanvas function
         socket.on('clear-canvas', clearCanvas);
+
+        // event listener listens for 'undo-drawing' events and calls clearCanvas function
+        socket.on('undo-drawing', undoLastMove);
 
         // Cleanup function to remove event listeners
         return () => {
@@ -141,6 +157,7 @@ const DrawingBoard = ({ socket, player }) => {
     return (
         <div>
             <canvas ref={canvasRef} className="drawing-board" width={600} height={600} />
+            <br />
             Colors: 
             {colors.map((color, index) =>
                 <ColorButton key={index} color={color} setColor={setColor} />
@@ -160,6 +177,7 @@ const DrawingBoard = ({ socket, player }) => {
                 Switch to {mode === 'draw' ? 'Erase' : 'Draw'}
             </button>
             <button onClick={handleClearButton}>Clear</button>
+            <button onClick={handleUndoButton}>Undo</button>
         </div>
     )
 }
