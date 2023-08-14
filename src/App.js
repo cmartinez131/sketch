@@ -23,11 +23,21 @@ const App = () => {
 	const [word, setWord] = useState('')
 	const [drawer, setDrawer] = useState('')
 	const [round, setRound] = useState(1)
+	const [roundResults, setRoundResults] = useState(null) //State to hold the results of the round
+
+	//Function to display the results window
+	const displayReultsWindow = (results) => {
+		setRoundResults(results)
+
+		//After 5 seconds, close the results window
+		setTimeout(() => {
+			setRoundResults(null)
+		}, 5000)
+	}
 
 	useEffect(() => {
 		const newSocket = io(ENDPOINT) // Connects endpoint to socket
 		setSocket(newSocket) // Sets socket state to newSocket
-
 
 		categoryService
 			.getAll()
@@ -56,6 +66,12 @@ const App = () => {
 			setRound(updatedRound)
 		})
 
+		newSocket.on('round-results', results => {
+			//Render the results window
+			console.log('Recevied round results:', results)
+			displayReultsWindow(results)
+		})
+
 		// cleanup function to disconnect the socket from the server when component unmounts
 		return () => {
 			newSocket.disconnect()
@@ -76,8 +92,6 @@ const App = () => {
 		socket.emit('words', words)
 	}
 
-
-
 	// Pass socket and players to the Game component
 	return (
 		<>
@@ -91,6 +105,20 @@ const App = () => {
 					<Route path="/endGame" element={<End players={players} socket={socket}></End>}></Route>
 				</Routes>
 			</Router>
+
+			{/* Conditionally render the results window if roundResults is not null */}
+			{roundResults && (
+				<div className="results-window">
+					<div className="results-overlay"> {/* Transparent grey background */}
+						<h2>Round Results</h2>
+						{roundResults.map((result, index) => (
+							<div key={index}>
+								{result.username}: {result.score >= 0 ? '+' : ''}{result.score}
+							</div>
+						))}
+					</div>
+				</div>
+			)}
 		</>
 	)
 }
