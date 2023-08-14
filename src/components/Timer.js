@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 
-const Timer = ({ socket }) =>{
-    const [timeLeft,setTimeLeft]=useState(60)
+const Timer = ({ socket }) => {
+	const [timeLeft,setTimeLeft]=useState(60)
 
-    useEffect(()=>{
-        socket.on('update-timer',setTimeLeft)
-    },[socket])
-    
-    return (
-        <div>
+	useEffect(() => {
+		socket.on('update-timer',setTimeLeft)
+	},[socket])
+
+	return (
+		<div>
             Time left: {timeLeft} seconds
-        </div>
-    )
+		</div>
+	)
 }
 
 export default Timer

@@ -1,15 +1,15 @@
 const mongoose = require('mongoose')
 
 const categorySchema = new mongoose.Schema({
-  category: { 
+	category: {
 		type: String,
 		required: [true, 'Category name required'],
 	},
-  user: { 
-		type: mongoose.Schema.Types.ObjectId, 
+	user: {
+		type: mongoose.Schema.Types.ObjectId,
 		ref: 'User'
 	},
-  words: { 
+	words: {
 		type: [String],
 		validate: {
 			validator: function(arr) {
