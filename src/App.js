@@ -29,19 +29,13 @@ const App = () => {
 		setSocket(newSocket) // Sets socket state to newSocket
 
 
-    categoryService
-      .getAll()
-      .then(response => {
-        const newWords = response.data[0].words
-        setWords(newWords);
-        newSocket.emit('words', newWords) //send 'words' and the new words to the server
-      })
-  // }, [])
-
-  // useEffect(() => {
-    // const newSocket = io(ENDPOINT);
-    // setSocket(newSocket);
-
+		categoryService
+			.getAll()
+			.then(response => {
+				const newWords = response.data[0].words
+				setWords(newWords)
+				newSocket.emit('words', newWords) //send 'words' and the new words to the server
+			})
 
 		// listen for the 'chat-message' event from the server. it appends the old message list with new message
 		newSocket.on('chat-message', data => {
@@ -91,7 +85,7 @@ const App = () => {
 				<Navbar />
 				{/* first loads the join page */}
 				<Routes>
-					<Route path="/" element={<Join onJoin={handleJoin} socket={socket}/>} />
+					<Route path="/" element={<Join onJoin={handleJoin} socket={socket} />} />
 					<Route path="/ready" element={<Ready currentPlayer={player} players={players} setPlayers={setPlayers} socket={socket} />} />
 					<Route path="/game" element={<Game player={player} players={players} socket={socket} messages={messages} sendMessage={sendMessage} word={word} round={round} />} />
 					<Route path="/endGame" element={<End players={players} socket={socket}></End>}></Route>

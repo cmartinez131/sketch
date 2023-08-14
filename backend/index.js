@@ -31,6 +31,7 @@ function startGame() {
 			roundTime--
 			if (roundTime <= 0) {
 				//Round is over, reset timer
+				
 				roundTime = 30
 				wordGuessed = false
 				correctGuessers.clear()
@@ -64,13 +65,16 @@ function switchDrawer() {
 	if (drawerIndex !== -1) {
 		players[drawerIndex].drawer = false
 		let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId) // Get the socket of the old drawer
-		oldDrawerSocket.leave('drawer')
+		oldDrawerSocket.leave('drawer') // Move the old drawer's socket to the 'drawer' room
 		oldDrawerSocket.join('guesser') // Move the old drawer's socket to the 'guesser' room
+		alreadyDrawed.add(players[drawerIndex].username) // Add the old drawer to the set of players who have already drawn
+	} else {
+		logger.info('No drawer found, setting the first player as drawer.');
+		drawerIndex = 0;
 	}
 
-	alreadyDrawed.add(players[drawerIndex].username)
 	const allPlayersDrawn = players.every(player => alreadyDrawed.has(player.username))
-	if (allPlayersDrawn){
+	if (allPlayersDrawn) {
 		alreadyDrawed.clear()
 		round += 1
 		io.emit('update-round', round)
@@ -85,13 +89,38 @@ function switchDrawer() {
 	io.emit('clear-canvas')
 	io.emit('update-players', players)
 
+	// get a new word
+	word = words[getRandomIndex(words)]
+
 	// get the socket ids of the new drawer and the new guesser
 	let newDrawerSocketId = players[drawerIndex].socketId
 	let newGuesserSocketId = players[(drawerIndex + 1) % players.length].socketId
 
 	// send the 'update-word' event to the new drawer and the new guesser
 	io.to(newDrawerSocketId).emit('update-word', word)
-	io.to(newGuesserSocketId).emit('update-word', generateUnderscores(word))
+	io.to('guesser').emit('update-word', generateUnderscores(word))
+
+	roundTime = 30
+	if (intervalID !== null) {
+		logger.info("drawer left, new game started")
+		startGame()
+	}
+}
+
+function endRound() {
+	//Calculate the points for each player
+	const results = players.map(player => ({
+		username: player.username,
+		score: player.score
+	}))
+
+	//send the results to all clients
+	io.emit('round-results', results)
+
+	//set a delay before starting the next round
+	setTimeout(() => {
+		startNextRound()
+	}, 5000)
 }
 
 function generateUnderscores(word) {
@@ -213,6 +242,9 @@ io.on('connection', socket => {
 			socket.join('guesser')
 			io.to('guesser').emit('update-word', generateUnderscores(word))
 			console.log('guesser word emited', word)
+		}
+		if (players.length >= 2 && intervalID === null) {
+			startGame()
 		}
 		// startGame();	//startGame moved to when startGame button clicked
 	})
