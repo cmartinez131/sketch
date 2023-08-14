@@ -3,13 +3,13 @@ const Category = require('../models/category')
 const User = require('../models/user')
 
 categoryRouter.get('/', async (request, response) => {
-  const categories = await Category
+	const categories = await Category
 		.find({}).populate('user', { username: 1, name: 1 })
-  response.json(categories)
+	response.json(categories)
 })
 
 categoryRouter.get('/:id', async (request, response) => {
-  const category = await Category
+	const category = await Category
 		.findById(request.params.id).populate('user', { username: 1, name: 1 })
 	if (category) {
 		response.json(category)
@@ -26,9 +26,9 @@ categoryRouter.post('/', async (request, response) => {
 
 	const category = new Category({
 		category: body.category,
-    user: user.id,
-    words: body.words
-	})  
+		user: user.id,
+		words: body.words
+	})
 
 	const savedCategory = await category.save()
 	user.personalWordLists = user.personalWordLists.concat(savedCategory._id)

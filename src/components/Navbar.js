@@ -1,17 +1,16 @@
-import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom'
 
 const Navbar = () => {
 
-    return (
-        <div>
-            <div>
-                <Link className='link' to="/">SKETCH</Link>
-            </div>
+	return (
+		<div>
+			<div>
+				<Link className='link' to="/">SKETCH</Link>
+			</div>
 
-        </div >
+		</div >
 
+	)
+}
 
-    );
-};
-
-export default Navbar;
+export default Navbar

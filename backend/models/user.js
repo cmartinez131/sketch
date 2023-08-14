@@ -2,10 +2,10 @@ const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 
 const userSchema = new mongoose.Schema({
-  username: { 
-		type: String, 
-		required: true, 
-		unique: true 
+	username: {
+		type: String,
+		required: true,
+		unique: true
 	},
 	password: {
 		type: String,
@@ -15,17 +15,17 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: true,
 	},
-	imagePath: { 
-		type: String, 
+	imagePath: {
+		type: String,
 		default: 'pathToAnImage'
 	},
-	level: { 
-		type: Number, 
-		min: 1, 
+	level: {
+		type: Number,
+		min: 1,
 		default: 1
 	},
-	score: { 
-		type: Number, 
+	score: {
+		type: Number,
 		default: 0
 	},
 	personalWordLists: {

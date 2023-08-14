@@ -4,14 +4,14 @@ const User = require('../models/user')
 const Category = require('../models/category')
 
 userRouter.get('/', async (request, response) => {
-  const users = await User
-		.find({}).populate('personalWordLists', { category: 1, words: 1})
-  response.json(users)
+	const users = await User
+		.find({}).populate('personalWordLists', { category: 1, words: 1 })
+	response.json(users)
 })
 
 userRouter.get('/:id', async (request, response) => {
-  const user = await User
-		.findById(request.params.id).populate('personalWordLists', { category: 1, words: 1})
+	const user = await User
+		.findById(request.params.id).populate('personalWordLists', { category: 1, words: 1 })
 	if (user) {
 		response.json(user)
 	}
@@ -34,7 +34,7 @@ userRouter.post('/', async (request, response) => {
 		level: body.level,
 		score: body.score,
 		personalWordLists: body.personalWordLists
-	})  
+	})
 
 	const savedUser = await user.save()
 	response.status(201).json(savedUser)
@@ -44,11 +44,11 @@ userRouter.delete('/:id', async (request, response) => {
 	const user = await User.findByIdAndRemove(request.params.id)
 
 	if (!user) {
-    return response.status(404).json({ error: 'User not found' })
-  }
+		return response.status(404).json({ error: 'User not found' })
+	}
 
-  // Remove the associated Category documents
-  await Category.deleteMany({ _id: { $in: user.personalWordLists } })
+	// Remove the associated Category documents
+	await Category.deleteMany({ _id: { $in: user.personalWordLists } })
 
 	response.status(204).end()
 })
