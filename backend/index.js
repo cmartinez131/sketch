@@ -10,6 +10,7 @@ const { Server } = require('socket.io')
 
 const cors = require('cors')
 const { runInContext } = require('vm')
+const { start } = require('repl')
 
 // array to store the active players on server
 let players = []
@@ -24,24 +25,24 @@ let intervalID = null //ID for the timer interval
 let wordGuessed = false //Boolean to check if the word has been guessed
 let correctGuessers = new Set() //Set to store the players who have guessed the word correctly
 let alreadyDrawed = new Set()
+//Array to store the points for each player in the current round
+let roundScores = []
 
 function startGame() {
+	//Reset roundScores for each round
+	roundScores = players.map(player => ({ username: player.username, score: 0 }))
+
 	if (players.length >= 2 && intervalID === null)
+
 		intervalID = setInterval(() => {
 			roundTime--
 			if (roundTime <= 0) {
-				//Round is over, reset timer
-				
-				roundTime = 30
-				wordGuessed = false
-				correctGuessers.clear()
+				//Round is over, show results
+				endRound()
 
-				switchDrawer()
-
-				word = words[getRandomIndex(words)]
-				io.to('drawer').emit('update-word', word)
-				io.to('guesser').emit('update-word', generateUnderscores(word))
-				logger.info('current word', word)
+				//Clear the current interval
+				clearInterval(intervalID)
+				intervalID = null
 			}
 
 			io.emit('update-timer', roundTime)
@@ -108,19 +109,27 @@ function switchDrawer() {
 }
 
 function endRound() {
-	//Calculate the points for each player
-	const results = players.map(player => ({
-		username: player.username,
-		score: player.score
-	}))
-
 	//send the results to all clients
-	io.emit('round-results', results)
+	console.log('Emitting round results: ', roundScores)
+	io.emit('round-results', roundScores)
 
 	//set a delay before starting the next round
 	setTimeout(() => {
-		startNextRound()
-	}, 5000)
+		//Reset the timer and round variables
+		roundTime = 30
+		wordGuessed = false
+		correctGuessers.clear()
+
+		//Start the next round
+		switchDrawer()
+		word = words[getRandomIndex(words)]
+		io.to('drawer').emit('update-word', word)
+		io.to('guesser').emit('update-word', generateUnderscores(word))
+		logger.info('current word', word)
+
+		//Start a new interval
+		startGame()
+	}, 5000) // 5s delay before starting the next round
 }
 
 function generateUnderscores(word) {
@@ -243,12 +252,13 @@ io.on('connection', socket => {
 			io.to('guesser').emit('update-word', generateUnderscores(word))
 			console.log('guesser word emited', word)
 		}
+
+		//Check if the game should start
 		if (players.length >= 2 && intervalID === null) {
 			startGame()
 		}
 		// startGame();	//startGame moved to when startGame button clicked
 	})
-
 
 	// event listener to listen for clients requesting to draw
 	socket.on('request-permission', ({ username }) => {
@@ -273,25 +283,31 @@ io.on('connection', socket => {
 				if (player) {
 					player.score += points
 				}
+
+				const roundScore = roundScores.find(p => p.username === message.user);
+				if (roundScore) {
+					roundScore.score += points;
+				}
 				//Add the player to the set of correct guessers
 				correctGuessers.add(message.user)
 
 				io.emit('chat-message', { user: 'System', color: 'lightgreen', text: `${message.user} guessed the word!` })
 			}
+
+			//Award the drawer points if a player have guessed the word
 			const drawer = players.find((p) => p.drawer)
 			if (drawer && !wordGuessed) {
 				drawer.score += 200
+				const roundScore = roundScores.find(p => p.username === drawer.username);
+				if (roundScore) {
+					roundScore.score += 200;
+				}
 				wordGuessed = true
 			}
 
+			//Check if all players have guessed the word
 			if (correctGuessers.size === players.length - 1) {
-				roundTime = 30
-				wordGuessed = false
-				correctGuessers.clear()
-				switchDrawer()
-				word = words[getRandomIndex(words)]
-				io.to('drawer').emit('update-word', word)
-				io.to('guesser').emit('update-word', generateUnderscores(word))
+				endRound()
 			}
 
 			logger.info('current word', word)
