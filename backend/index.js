@@ -25,6 +25,7 @@ let intervalID = null //ID for the timer interval
 let wordGuessed = false //Boolean to check if the word has been guessed
 let correctGuessers = new Set() //Set to store the players who have guessed the word correctly
 let alreadyDrawed = new Set()
+
 //Array to store the points for each player in the current round
 let roundScores = []
 
@@ -63,6 +64,7 @@ function switchDrawer() {
 
 	let drawerIndex = players.findIndex(player => player.drawer)
 
+	// Make the drawer a guesser
 	if (drawerIndex !== -1) {
 		players[drawerIndex].drawer = false
 		let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId) // Get the socket of the old drawer
@@ -70,10 +72,11 @@ function switchDrawer() {
 		oldDrawerSocket.join('guesser') // Move the old drawer's socket to the 'guesser' room
 		alreadyDrawed.add(players[drawerIndex].username) // Add the old drawer to the set of players who have already drawn
 	} else {
-		logger.info('No drawer found, setting the first player as drawer.');
-		drawerIndex = 0;
+		logger.info('No drawer found, setting the first player as drawer.')
+		drawerIndex = 0
 	}
 
+	// Once all the players have drawn, go on to the next round
 	const allPlayersDrawn = players.every(player => alreadyDrawed.has(player.username))
 	if (allPlayersDrawn) {
 		alreadyDrawed.clear()
@@ -81,6 +84,7 @@ function switchDrawer() {
 		io.emit('update-round', round)
 	}
 
+	// Make the next drawer a drawer
 	drawerIndex = (drawerIndex + 1) % players.length
 	players[drawerIndex].drawer = true
 	let newDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId) // Get the socket of the new drawer
@@ -103,7 +107,7 @@ function switchDrawer() {
 
 	roundTime = 60
 	if (intervalID !== null) {
-		logger.info("drawer left, new game started")
+		logger.info('drawer left, new game started')
 		startGame()
 	}
 }
@@ -237,6 +241,7 @@ io.on('connection', socket => {
 
 		io.emit('update-players', players)
 		logger.info('current players', players)
+		io.emit('update-round', round)
 
 		if (word === '') {
 			word = words[getRandomIndex(words)]
@@ -284,9 +289,9 @@ io.on('connection', socket => {
 					player.score += points
 				}
 
-				const roundScore = roundScores.find(p => p.username === message.user);
+				const roundScore = roundScores.find(p => p.username === message.user)
 				if (roundScore) {
-					roundScore.score += points;
+					roundScore.score += points
 				}
 				//Add the player to the set of correct guessers
 				correctGuessers.add(message.user)
@@ -298,9 +303,9 @@ io.on('connection', socket => {
 			const drawer = players.find((p) => p.drawer)
 			if (drawer && !wordGuessed) {
 				drawer.score += 200
-				const roundScore = roundScores.find(p => p.username === drawer.username);
+				const roundScore = roundScores.find(p => p.username === drawer.username)
 				if (roundScore) {
-					roundScore.score += 200;
+					roundScore.score += 200
 				}
 				wordGuessed = true
 			}
