@@ -17,6 +17,9 @@ const Game = ({ player, players, socket, messages, sendMessage, word, round }) =
 		if (round === 4) {
 			navigate('/endGame')
 		}
+		if (socket) {//Start the game when the player is ready
+			socket.emit('start-game')
+		}
 	}, [player, navigate, round])
 
 	return (
@@ -28,7 +31,7 @@ const Game = ({ player, players, socket, messages, sendMessage, word, round }) =
 			<div className='middle'>
 				<Timer socket={socket} />
 				<h2 className='currentWord'>{word}</h2>
-				<DrawingBoard socket={socket} player={player}/>
+				<DrawingBoard socket={socket} player={player} />
 			</div>
 			<div className='right'>
 				<Guess player={player} messages={messages} sendMessage={sendMessage} />
