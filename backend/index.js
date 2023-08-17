@@ -70,8 +70,8 @@ function switchDrawer() {
 		oldDrawerSocket.join('guesser') // Move the old drawer's socket to the 'guesser' room
 		alreadyDrawed.add(players[drawerIndex].username) // Add the old drawer to the set of players who have already drawn
 	} else {
-		logger.info('No drawer found, setting the first player as drawer.');
-		drawerIndex = 0;
+		logger.info('No drawer found, setting the first player as drawer.')
+		drawerIndex = 0
 	}
 
 	const allPlayersDrawn = players.every(player => alreadyDrawed.has(player.username))
@@ -103,7 +103,7 @@ function switchDrawer() {
 
 	roundTime = 30
 	if (intervalID !== null) {
-		logger.info("drawer left, new game started")
+		logger.info('drawer left, new game started')
 		startGame()
 	}
 }
@@ -237,6 +237,7 @@ io.on('connection', socket => {
 
 		io.emit('update-players', players)
 		logger.info('current players', players)
+		io.emit('update-round', round)
 
 		if (word === '') {
 			word = words[getRandomIndex(words)]
@@ -284,9 +285,9 @@ io.on('connection', socket => {
 					player.score += points
 				}
 
-				const roundScore = roundScores.find(p => p.username === message.user);
+				const roundScore = roundScores.find(p => p.username === message.user)
 				if (roundScore) {
-					roundScore.score += points;
+					roundScore.score += points
 				}
 				//Add the player to the set of correct guessers
 				correctGuessers.add(message.user)
@@ -298,9 +299,9 @@ io.on('connection', socket => {
 			const drawer = players.find((p) => p.drawer)
 			if (drawer && !wordGuessed) {
 				drawer.score += 200
-				const roundScore = roundScores.find(p => p.username === drawer.username);
+				const roundScore = roundScores.find(p => p.username === drawer.username)
 				if (roundScore) {
-					roundScore.score += 200;
+					roundScore.score += 200
 				}
 				wordGuessed = true
 			}
