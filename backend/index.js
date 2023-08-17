@@ -20,7 +20,7 @@ let round = 1
 
 let gameHasStarted = false
 
-let roundTime = 25//Timer for the game
+let roundTime = 60//Timer for the game
 let intervalID = null //ID for the timer interval
 let wordGuessed = false //Boolean to check if the word has been guessed
 let correctGuessers = new Set() //Set to store the players who have guessed the word correctly
@@ -101,7 +101,7 @@ function switchDrawer() {
 	io.to(newDrawerSocketId).emit('update-word', word)
 	io.to('guesser').emit('update-word', generateUnderscores(word))
 
-	roundTime = 25
+	roundTime = 60
 	if (intervalID !== null) {
 		logger.info("drawer left, new game started")
 		startGame()
@@ -116,7 +116,7 @@ function endRound() {
 	//set a delay before starting the next round
 	setTimeout(() => {
 		//Reset the timer and round variables
-		roundTime = 25
+		roundTime = 60
 		wordGuessed = false
 		correctGuessers.clear()
 
