@@ -4,12 +4,6 @@
 
 Make sure all dependencies are installed
 
-### `npm run build`
-
-In the root directory run `npm build` to the app for production to the `build` folder in the root directory.
-
-Important: Move build folder from root directory to backend folder
-
 ### `cd backend/`
 
 cd into backend folder
