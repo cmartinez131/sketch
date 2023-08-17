@@ -20,11 +20,11 @@ let round = 1
 
 let gameHasStarted = false
 
-let roundTime = 30//Timer for the game
-let intervalID = null //ID for the timer interval
-let wordGuessed = false //Boolean to check if the word has been guessed
-let correctGuessers = new Set() //Set to store the players who have guessed the word correctly
-let alreadyDrawed = new Set()
+let roundTime = 60 								// Timer for the game
+let intervalID = null 						// ID for the timer interval
+let wordGuessed = false 					// Boolean to check if the word has been guessed
+let correctGuessers = new Set() 	// Set to store the players who have guessed the word correctly
+let alreadyDrawed = new Set() 		// Set to store the players who have drawn already
 //Array to store the points for each player in the current round
 let roundScores = []
 
@@ -63,6 +63,7 @@ function switchDrawer() {
 
 	let drawerIndex = players.findIndex(player => player.drawer)
 
+	// Make the drawer a guesser
 	if (drawerIndex !== -1) {
 		players[drawerIndex].drawer = false
 		let oldDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId) // Get the socket of the old drawer
@@ -74,6 +75,7 @@ function switchDrawer() {
 		drawerIndex = 0
 	}
 
+	// Once all the players have drawn, go on to the next round
 	const allPlayersDrawn = players.every(player => alreadyDrawed.has(player.username))
 	if (allPlayersDrawn) {
 		alreadyDrawed.clear()
@@ -81,6 +83,7 @@ function switchDrawer() {
 		io.emit('update-round', round)
 	}
 
+	// Make the next drawer a drawer
 	drawerIndex = (drawerIndex + 1) % players.length
 	players[drawerIndex].drawer = true
 	let newDrawerSocket = io.sockets.sockets.get(players[drawerIndex].socketId) // Get the socket of the new drawer
@@ -101,7 +104,7 @@ function switchDrawer() {
 	io.to(newDrawerSocketId).emit('update-word', word)
 	io.to('guesser').emit('update-word', generateUnderscores(word))
 
-	roundTime = 30
+	roundTime = 60
 	if (intervalID !== null) {
 		logger.info('drawer left, new game started')
 		startGame()
@@ -116,7 +119,7 @@ function endRound() {
 	//set a delay before starting the next round
 	setTimeout(() => {
 		//Reset the timer and round variables
-		roundTime = 30
+		roundTime = 60
 		wordGuessed = false
 		correctGuessers.clear()
 
