@@ -19,11 +19,11 @@ const App = () => {
 	])
 	const [socket, setSocket] = useState(null) // State to hold the socket
 	const [messages, setMessages] = useState([]) // State to hold sent and received messages
-	const [words, setWords] = useState([]) // State to hold the words
-	const [word, setWord] = useState('')
-	const [drawer, setDrawer] = useState('')
-	const [round, setRound] = useState(1)
-	const [roundResults, setRoundResults] = useState(null) //State to hold the results of the round
+	const [words, setWords] = useState([]) // State to hold all possible words to draw
+	const [word, setWord] = useState('') // State to hold the word the drawer needs to draw
+	const [drawer, setDrawer] = useState('') // State to hold the username of the drawer
+	const [round, setRound] = useState(1) // State to hold the current round
+	const [roundResults, setRoundResults] = useState(null) // State to hold the results of the round
 
 	//Function to display the results window
 	const displayReultsWindow = (results) => {

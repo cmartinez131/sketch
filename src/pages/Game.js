@@ -17,10 +17,13 @@ const Game = ({ player, players, socket, messages, sendMessage, word, round }) =
 		if (round === 4) {
 			navigate('/endGame')
 		}
+	}, [player, navigate, round])
+
+	useEffect(() => {
 		if (socket) {//Start the game when the player is ready
 			socket.emit('start-game')
 		}
-	}, [player, navigate, round])
+	}, [])
 
 	return (
 		<div className='container'>
